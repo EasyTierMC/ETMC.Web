@@ -17,4 +17,25 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
+  build:{
+    rollupOptions:{
+      output:{
+        manualChunks(id){
+          if(id.includes('node_modules')){
+            if(id.includes('vite-plugin-vue-devtools')){
+              return;
+            }
+            if(id.includes('axios')){
+              return 'axios'
+            }
+            if(id.includes('echarts')){
+              return 'echarts'
+            }
+            return 'vendor'
+          }
+          return 'main'
+        }
+      }
+    }
+  }
 })
