@@ -21,75 +21,51 @@ const data = [
 ]
 
 const option = ref<echarts.EChartsOption>({
-  tooltip: {
-    show: true,
-    formatter: '{b}: {c}个节点'
-  },
+  tooltip: { show: true, formatter: '{b}: {c}个节点' },
   visualMap: {
     type: 'piecewise',
     min: 0,
     max: 50,
     pieces: [
-      {
-        max: 5,
-        label: '少',
-        color: '#ff4d4d'
-      },
-      {
-        min: 5,
-        max: 15,
-        label: '中',
-        color: '#ffa64d'
-      },
-      {
-        min: 15,
-        max: 20,
-        label: '多',
-        color: '#ffcc00'
-      },
-      {
-        min: 20,
-        max: 30,
-        label: '非常多',
-        color: '#99cc33'
-      },
-      {
-        min: 30,
-        label: '数据中心',
-        color: '#33cc33'
-      }
+      { max: 3, label: '少(0-3)', color: '#ff4d4d' },
+      { min: 3, max: 10, label: '中(3-10)', color: '#ffa64d' },
+      { min: 10, max: 15, label: '多(10-15)', color: '#ffcc00' },
+      { min: 15, max: 25, label: '非常多(15-25)', color: '#99cc33' },
+      { min: 30, label: '数据中心(30+)', color: '#33cc33' }
     ],
-    textStyle: {
-      color: window.matchMedia('(prefers-color-scheme: dark)').matches ? '#fff' : '#000'
-    }
+    textStyle: { color: undefined }
   },
   series: [{
     name: '服务器节点',
     type: 'map',
     map: 'china',
     roam: false,
-    select: {
-      disabled: true     // 禁用选择状态
-    },
-    emphasis: {
-      label: {
-        show: true,
-      },
-      itemStyle: {
-        areaColor: '#FFDE59'
-      }
-    },
+    select: { disabled: true },
+    emphasis: { label: { show: true }, itemStyle: { areaColor: '#FFDE59' } },
     data
   }]
 });
+
+const updateTheme = (e: MediaQueryListEvent | boolean) => {
+  const isDark = typeof e === 'boolean' ? e : e.matches;
+  const color = option.value.visualMap as { textStyle: { color: string } };
+  color.textStyle.color = isDark ? '#fff' : '#000';
+};
+
 onMounted(() => {
-  matchMedia('(prefers-color-scheme: light)').addEventListener('change', (e) => {
-    const color = option.value.visualMap as { textStyle: { color: string } };
-    if (e.matches) {
-      color.textStyle.color = '#000'
-    } else {
-      color.textStyle.color = '#fff'
-    }
-  })
-})
+  const chart = echarts.getInstanceByDom(document.querySelector('.chart') as HTMLElement);
+  const resizeObserver = new ResizeObserver(() => {
+    chart?.resize();
+  });
+  resizeObserver.observe(document.querySelector('.chart') as HTMLElement);
+
+  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+  updateTheme(mediaQuery.matches);
+  mediaQuery.addEventListener('change', updateTheme);
+
+  return () => {
+    resizeObserver.disconnect();
+    mediaQuery.removeEventListener('change', updateTheme);
+  };
+});
 </script>
