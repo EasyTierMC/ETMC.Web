@@ -13,6 +13,7 @@ export default defineConfig({
     tailwindcss()
   ],
   resolve: {
+    extensions: ['.vue','.ts','.js','.json','.mjs','.cjs'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
