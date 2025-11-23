@@ -60,7 +60,7 @@
 
           <!-- 连接数标题 -->
           <div class="min-w-[140px] shrink-0">
-            <span class="text-sm font-medium text-base-content/70">当前/最大连接</span>
+            <span class="text-sm font-medium text-base-content/70">当前连接数</span>
           </div>
 
           <!-- 标签标题 -->
@@ -115,9 +115,6 @@
             <div class="min-w-[140px] shrink-0">
               <div class="flex items-center gap-2 text-xs">
                 <span class="font-bold">{{ node.currentConnections }}</span>
-                <span class="text-base-content/60">/</span>
-                <span class="font-bold">{{ node.maxConnections }}</span>
-                <span class="text-base-content/60">连接</span>
               </div>
             </div>
 
@@ -247,7 +244,7 @@ const sortOrder = ref<'asc' | 'desc'>('asc')
 
 // 分页状态
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(30)
 const pageSizeOptions = [10, 30, 50, 100, 200]
 
 // 示例节点数据
