@@ -34,6 +34,15 @@ async function onSubmit() {
 
 <template>
   <div class="min-h-[calc(100vh-200px)] flex items-center justify-center">
+    <!-- 装饰 -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+      <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl"></div>
+      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl"></div>
+      <div
+        class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-accent/10 rounded-full blur-3xl">
+      </div>
+    </div>
+
     <div class="max-w-md w-full mx-auto px-4">
       <div class="card bg-base-100 shadow-lg">
         <div class="card-body">
@@ -50,14 +59,15 @@ async function onSubmit() {
               <div class="label">
                 <span class="label-text font-medium">登陆密码</span>
               </div>
-              <input v-model="password" type="password" class="input input-bordered w-full" autocomplete="current-password" />
+              <input v-model="password" type="password" class="input input-bordered w-full"
+                autocomplete="current-password" />
             </label>
-            
+
             <div v-if="error" class="alert alert-error">
               <span>{{ error }}</span>
             </div>
             <button class="btn btn-primary mt-2 w-full" type="submit" :disabled="loading">
-              <span>{{loading ? '登录中...' : '登录' }}</span>
+              <span>{{ loading ? '登录中...' : '登录' }}</span>
             </button>
           </form>
         </div>
@@ -66,5 +76,4 @@ async function onSubmit() {
   </div>
 </template>
 
-<style scoped>
-</style>
+<style scoped></style>
