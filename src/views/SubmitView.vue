@@ -232,12 +232,6 @@
           </div>
         </div>
       </div>
-
-      <div class="text-center mt-6">
-        <p v-if="!nodeForm.allow_relay" class="text-warning">⚠提示：非中继节点推荐使用wss或ws协议并套上CDN以防止节点源站服务器遭受到DDos攻击！</p>
-        <p v-if="nodeForm.allow_relay && (nodeForm.protocol === 'ws' || nodeForm.protocol === 'wss')" class="text-warning">
-          ⚠提示：中继节点选择ws或wss协议可能会让节点使用者载着马斯克的星舰前往火星并访问地球互联网！</p>
-      </div>
     </div>
   </div>
 </template>
