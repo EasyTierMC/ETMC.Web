@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <v-chart class="chart" :option="option" />
+  <div class="w-full h-full">
+    <v-chart class="chart w-full h-full" :option="option" />
   </div>
 </template>
 
@@ -53,17 +53,34 @@ const updateTheme = (e: MediaQueryListEvent | boolean) => {
 };
 
 onMounted(() => {
-  const chart = echarts.getInstanceByDom(document.querySelector('.chart') as HTMLElement);
+  const chartElement = document.querySelector('.chart') as HTMLElement;
+  if (!chartElement) return;
+  
+  const chart = echarts.getInstanceByDom(chartElement);
+  if (!chart) return;
+
+  // 立即设置一次大小
+  chart.resize();
+
+  // 监听窗口大小变化
+  const handleResize = () => {
+    chart.resize();
+  };
+  
+  window.addEventListener('resize', handleResize);
+
+  // 使用 ResizeObserver 监听容器大小变化
   const resizeObserver = new ResizeObserver(() => {
-    chart?.resize();
+    chart.resize();
   });
-  resizeObserver.observe(document.querySelector('.chart') as HTMLElement);
+  resizeObserver.observe(chartElement);
 
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   updateTheme(mediaQuery.matches);
   mediaQuery.addEventListener('change', updateTheme);
 
   return () => {
+    window.removeEventListener('resize', handleResize);
     resizeObserver.disconnect();
     mediaQuery.removeEventListener('change', updateTheme);
   };
