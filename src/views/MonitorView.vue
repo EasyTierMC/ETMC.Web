@@ -22,10 +22,53 @@
             <option value="offline">离线</option>
           </select>
 
-          <select v-model="tagFilter" class="select select-bordered text-sm min-w-[120px]">
-            <option value="">全部标签</option>
-            <option v-for="tag in availableTags" :key="tag" :value="tag">{{ tag }}</option>
-          </select>
+          <div class="dropdown dropdown-bottom">
+            <div tabindex="0" role="button" class="select select-bordered text-sm min-w-[120px] justify-between">
+              <span>{{ selectedTags.length > 0 ? `已选${selectedTags.length}个` : '全部标签' }}</span>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
+            </div>
+            <div tabindex="0" class="dropdown-content bg-base-100 rounded-box shadow-lg border border-base-300 w-48 p-2 z-[1]">
+              <div class="max-h-48 overflow-y-auto">
+                <label class="flex items-center gap-2 p-2 hover:bg-base-200 rounded cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    class="checkbox checkbox-sm" 
+                    @change="toggleAllTags"
+                    :checked="selectedTags.length === availableTags.length && availableTags.length > 0"
+                    :indeterminate="selectedTags.length > 0 && selectedTags.length < availableTags.length"
+                  />
+                  <span class="text-sm">全选</span>
+                </label>
+                <div class="divider my-1"></div>
+                <label 
+                  v-for="tag in availableTags" 
+                  :key="tag"
+                  class="flex items-center gap-2 p-2 hover:bg-base-200 rounded cursor-pointer"
+                >
+                  <input 
+                    type="checkbox" 
+                    class="checkbox checkbox-sm" 
+                    :value="tag"
+                    v-model="selectedTags"
+                  />
+                  <span class="text-sm">{{ tag }}</span>
+                </label>
+              </div>
+              <div class="divider my-1"></div>
+              <div class="flex items-center justify-between p-2">
+                <span class="text-xs text-base-content/60">{{ selectedTags.length }}/{{ availableTags.length }}</span>
+                <button 
+                  v-if="selectedTags.length > 0"
+                  @click="clearTagSelection"
+                  class="btn btn-ghost btn-xs"
+                >
+                  清除
+                </button>
+              </div>
+            </div>
+          </div>
 
           <div class="flex gap-2">
             <select v-model="sortBy" class="select select-bordered text-sm min-w-[120px]">
@@ -238,7 +281,7 @@ interface Node {
 // 搜索和筛选状态
 const searchQuery = ref('')
 const statusFilter = ref('all')
-const tagFilter = ref('')
+const selectedTags = ref<string[]>([])
 const sortBy = ref('id')
 const sortOrder = ref<'asc' | 'desc'>('asc')
 
@@ -436,7 +479,7 @@ const filteredAndSortedNodes = computed(() => {
       (statusFilter.value === 'all' || 
         (statusFilter.value === 'online' && node.isOnline) ||
         (statusFilter.value === 'offline' && !node.isOnline)) &&
-      (!tagFilter.value || node.tags.includes(tagFilter.value))
+      (selectedTags.value.length === 0 || selectedTags.value.some(tag => node.tags.includes(tag)))
     )
     .sort((a, b) => {
       const comparison = sortMethods[sortBy.value as keyof typeof sortMethods](a, b)
@@ -480,6 +523,19 @@ const getPageNumbers = () => {
 // 切换排序顺序
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+}
+
+// 标签选择相关方法
+const toggleAllTags = () => {
+  if (selectedTags.value.length === availableTags.value.length) {
+    selectedTags.value = []
+  } else {
+    selectedTags.value = [...availableTags.value]
+  }
+}
+
+const clearTagSelection = () => {
+  selectedTags.value = []
 }
 
 // 计算负载分数
