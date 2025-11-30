@@ -1,34 +1,13 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
-import { login } from '@/utils/request/api'
 
-const router = useRouter()
-
-const username = ref('admin')
-const password = ref('admin123')
 const loading = ref(false)
-const error = ref<string | null>(null)
-const success = ref(false)
 
-async function onSubmit() {
-  if (!username.value || !password.value) {
-    error.value = '请输入用户名和密码'
-    return
-  }
+// GitHub登录 - 直接跳转到后端处理的OAuth端点
+function loginWithGitHub() {
   loading.value = true
-  error.value = null
-  success.value = false
-  try {
-    await login(username.value, password.value)
-    success.value = true
-    // 登录成功后跳转到管理控制台
-    setTimeout(() => router.push('/dashboard'), 600)
-  } catch (e: any) {
-    error.value = e?.message || '登录失败，请重试'
-  } finally {
-    loading.value = false
-  }
+  // 跳转到后端的GitHub OAuth登录端点
+  window.location.href = '/auth/github'
 }
 </script>
 
@@ -46,30 +25,30 @@ async function onSubmit() {
     <div class="max-w-md w-full mx-auto px-4">
       <div class="card bg-base-100 shadow-lg">
         <div class="card-body">
-          <h2 class="card-title text-2xl justify-center mb-4">登录</h2>
+          <h2 class="card-title text-2xl justify-center mb-6">欢迎登录</h2>
+          <p class="text-center text-base-content/70 mb-6">使用您的GitHub账户快速登录</p>
 
-          <form @submit.prevent="onSubmit" class="flex flex-col gap-4">
-            <label class="form-control w-full">
-              <div class="label">
-                <span class="label-text font-medium">用户账户</span>
-              </div>
-              <input v-model="username" type="text" class="input input-bordered w-full" autocomplete="username" />
-            </label>
-            <label class="form-control w-full">
-              <div class="label">
-                <span class="label-text font-medium">登陆密码</span>
-              </div>
-              <input v-model="password" type="password" class="input input-bordered w-full"
-                autocomplete="current-password" />
-            </label>
+          <button 
+            @click="loginWithGitHub" 
+            class="btn btn-primary w-full" 
+            :disabled="loading"
+          >
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            <span>{{ loading ? '登录中...' : '使用 GitHub 登录' }}</span>
+          </button>
 
-            <div v-if="error" class="alert alert-error">
-              <span>{{ error }}</span>
-            </div>
-            <button class="btn btn-primary mt-2 w-full" type="submit" :disabled="loading">
-              <span>{{ loading ? '登录中...' : '登录' }}</span>
-            </button>
-          </form>
+          <div class="mt-4 text-center">
+            <p class="text-sm text-base-content/60">
+              <span class="inline-flex items-center gap-1 text-warning">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                登录即表示同意获取您的用户名和头像信息
+              </span>
+            </p>
+          </div>
         </div>
       </div>
     </div>
