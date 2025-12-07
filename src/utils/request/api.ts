@@ -6,6 +6,23 @@ export interface HealthResponse {
   [key: string]: any
 }
 
+interface IMe{
+  username:string,
+  avatar:string,
+}
+
+interface ILogin{
+  info:{
+    login:string,
+    avatar_url:string,
+  }
+}
+
+export async function login(code:string){
+  const res = await Api.post('http://localhost:3000/auth/oauth?code='+code);
+  return res as unknown as ILogin
+}
+
 export function getHealth() {
   const path = import.meta.env.VITE_HEALTH_PATH || '/health'
   return Api.get<HealthResponse>(path)
@@ -20,25 +37,34 @@ export interface LoginResponse {
   [key: string]: any
 }
 
-export async function login(username: string, password: string) {
-  const res = (await Api.post<LoginResponse>('/auth/login', { username, password })) as unknown as LoginResponse
-  const token = (res as any)?.data.token
-  if (token) {
-    localStorage.setItem('auth_token', token)
-  }
-  return res
-}
+// export async function login(username: string, password: string) {
+//   const res = (await Api.post<LoginResponse>('/auth/login', { username, password })) as unknown as LoginResponse
+//   const token = (res as any)?.data.token
+//   if (token) {
+//     localStorage.setItem('auth_token', token)
+//   }
+//   return res
+// }
 
 export function logout() {
-  localStorage.removeItem('auth_token')
+  sessionStorage.removeItem('me')
+  cookieStore.delete('auth_token')
 }
 
-export function isAuthenticated() {
-  return !!localStorage.getItem('auth_token')
+export async function isAuthenticated() {
+  const s = sessionStorage.getItem('me');
+  const c = await cookieStore.get('auth_token')
+   return !!(s&&c)
+  //return true
 }
 
 export function getMe() {
-  return (Api.get('/auth/me') as Promise<any>)
+  let result:IMe|undefined = undefined;
+  const localme = sessionStorage.getItem('me')
+  if(localme){
+    result = JSON.parse(localme)
+  }
+  return /*(Api.get('/auth/me') as Promise<any>)*/result;
 }
 
 // Admin list (requires admin role)

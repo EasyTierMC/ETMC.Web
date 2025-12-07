@@ -5,13 +5,13 @@ const Api = axios.create({
   headers: {
     'Content-Type': 'application/json'
   },
-  withCredentials: false,
+  withCredentials: true,
   timeout: 30000
 })
 
 Api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token')
+    const token = cookieStore.get('auth_token')
     if (token) {
       config.headers = config.headers || {}
       config.headers.Authorization = `Bearer ${token}`
