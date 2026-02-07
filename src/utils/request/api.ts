@@ -24,7 +24,7 @@ export type {
 }
 
 export async function login(code: string): Promise<ILogin> {
-  return (await Api.post<ILogin>('api/oauth/callback?code=' + code)) as unknown as ILogin
+  return (await Api.post<ILogin>('oauth/callback?code=' + code)) as unknown as ILogin
 }
 
 export async function getClientId(): Promise<IClientId> {
