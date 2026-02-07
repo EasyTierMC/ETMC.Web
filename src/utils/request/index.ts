@@ -1,7 +1,7 @@
-import axios from 'axios'
+import axios, { AxiosError, type InternalAxiosRequestConfig, type AxiosResponse } from 'axios'
 
 const Api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000',
   headers: {
     'Content-Type': 'application/json'
   },
@@ -10,22 +10,24 @@ const Api = axios.create({
 })
 
 Api.interceptors.request.use(
-  (config) => {
-    const token = cookieStore.get('auth_token')
-    if (token) {
-      config.headers = config.headers || {}
-      config.headers.Authorization = `Bearer ${token}`
+  async (config: InternalAxiosRequestConfig) => {
+    if (typeof window !== 'undefined' && window.cookieStore) {
+      const token = await window.cookieStore.get('auth_token')
+      if (token) {
+        config.headers = config.headers || {}
+        config.headers.Authorization = `Bearer ${token.value}`
+      }
     }
     return config
   },
-  (error) => Promise.reject(error)
+  (error: AxiosError) => Promise.reject(error)
 )
 
 Api.interceptors.response.use(
-  (response) => response.data,
-  (error) => {
+  (response: AxiosResponse) => response.data,
+  (error: AxiosError) => {
     if (error.response) {
-      const { status, data } = error.response
+      const { status, data } = error.response as any
       const message = data?.message || `Request failed with status ${status}`
       return Promise.reject(new Error(message))
     }

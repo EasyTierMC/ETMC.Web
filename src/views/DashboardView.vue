@@ -43,8 +43,8 @@ const isAdmin = computed(() => currentUser.value?.username === 'admin')
 
 async function fetchUserInfo() {
   try {
-    const { data } = await getMe()
-    currentUser.value = data
+    const me = await getMe()
+    currentUser.value = me
   } catch (e: any) {
     console.error(e);
     
