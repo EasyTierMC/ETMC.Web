@@ -60,7 +60,7 @@ async function fetchUserInfo() {
 async function fetchNodes() {
   loadingNodes.value = true
   try {
-    const [data] = await listNodes()
+    const data = await listNodes()
     nodeList.value = data
   } catch (e: any) {
     console.error('获取节点失败:', e)
@@ -93,8 +93,7 @@ async function handleToggleNodeStatus(node: any) {
 async function fetchApiKeys() {
   loadingApiKeys.value = true
   try {
-    const [data] = await listApiKeys()
-    
+    const data = await listApiKeys()
     apiKeys.value = data
   } catch (e: any) {
     console.error('获取 API Keys 失败:', e)
@@ -140,8 +139,7 @@ async function fetchAdmins() {
   if (!isAdmin.value) return
   loadingAdmins.value = true
   try {
-    const [ data ] = await listAdmins()
-    
+    const data = await listAdmins()
     userList.value = data
   } catch (e: any) {
     console.error('获取管理员列表失败:', e)

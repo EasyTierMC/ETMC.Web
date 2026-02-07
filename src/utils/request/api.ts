@@ -1,87 +1,83 @@
 import Api from './index'
+import type {
+  HealthResponse,
+  IClientId,
+  IMe,
+  ILogin,
+  LoginResponse,
+  Admin,
+  ApiKey,
+  Node,
+  Peer
+} from './types'
 
-export interface HealthResponse {
-  status?: string
-  uptime?: number
-  [key: string]: any
+export type {
+  HealthResponse,
+  IClientId,
+  IMe,
+  ILogin,
+  LoginResponse,
+  Admin,
+  ApiKey,
+  Node,
+  Peer
 }
 
-interface IMe{
-  username:string,
-  avatar:string,
+export async function login(code: string): Promise<ILogin> {
+  return (await Api.post<ILogin>('api/oauth/callback?code=' + code)) as unknown as ILogin
 }
 
-interface ILogin{
-  info:{
-    login:string,
-    avatar_url:string,
-  }
+export async function getClientId(): Promise<IClientId> {
+  return (await Api.get<IClientId>('oauth/clientId')) as unknown as IClientId
 }
 
-export async function login(code:string){
-  const res = await Api.post('http://localhost:3000/auth/oauth?code='+code);
-  return res as unknown as ILogin
-}
-
-export function getHealth() {
+export function getHealth(): Promise<HealthResponse> {
   const path = import.meta.env.VITE_HEALTH_PATH || '/health'
-  return Api.get<HealthResponse>(path)
+  return Api.get<HealthResponse>(path) as unknown as Promise<HealthResponse>
 }
 
 export function getApiDocsUrl() {
   return import.meta.env.VITE_API_DOCS_URL || `${import.meta.env.VITE_API_BASE_URL}/api`
 }
 
-export interface LoginResponse {
-  token: string
-  [key: string]: any
-}
-
-// export async function login(username: string, password: string) {
-//   const res = (await Api.post<LoginResponse>('/auth/login', { username, password })) as unknown as LoginResponse
-//   const token = (res as any)?.data.token
-//   if (token) {
-//     localStorage.setItem('auth_token', token)
-//   }
-//   return res
-// }
-
-export function logout() {
+export async function logout() {
   sessionStorage.removeItem('me')
-  cookieStore.delete('auth_token')
+  if (typeof window !== 'undefined' && window.cookieStore) {
+    await window.cookieStore.delete('auth_token')
+  }
 }
 
 export async function isAuthenticated() {
-  const s = sessionStorage.getItem('me');
-  const c = await cookieStore.get('auth_token')
-   return !!(s&&c)
-  //return true
-}
-
-export function getMe() {
-  let result:IMe|undefined = undefined;
-  const localme = sessionStorage.getItem('me')
-  if(localme){
-    result = JSON.parse(localme)
+  const s = sessionStorage.getItem('me')
+  if (typeof window !== 'undefined' && window.cookieStore) {
+    const c = await window.cookieStore.get('auth_token')
+    return !!(s && c)
   }
-  return /*(Api.get('/auth/me') as Promise<any>)*/result;
+  return false
 }
 
-// Admin list (requires admin role)
-export function listAdmins() {
-  return Api.get('/admins') as Promise<any[]>
+export function getMe(): IMe | undefined {
+  const localme = sessionStorage.getItem('me')
+  if (localme) {
+    return JSON.parse(localme)
+  }
+  return undefined
+}
+
+export function listAdmins(): Promise<Admin[]> {
+  return Api.get<Admin[]>('/admins') as unknown as Promise<Admin[]>
 }
 
 export function deleteAdmin(id: string | number) {
   return Api.delete(`/admins/${id}`)
 }
 
-export function createApiKey(data: any) {
+export function createApiKey(data: Partial<ApiKey>) {
   return Api.post('/api-keys', data)
 }
 
-export function listApiKeys() {
-  return Api.get('/api-keys') as Promise<any[]>
+export function listApiKeys(): Promise<ApiKey[]> {
+  return Api.get<ApiKey[]>('/api-keys') as unknown as Promise<ApiKey[]>
 }
 
 export function toggleApiKeyStatus(id: string | number, status: string) {
@@ -92,12 +88,12 @@ export function deleteApiKey(id: string | number) {
   return Api.delete(`/api-keys/${id}`)
 }
 
-export function createNode(data: any) {
+export function createNode(data: Partial<Node>) {
   return Api.post('/nodes', data)
 }
 
-export function listNodes() {
-  return Api.get('/nodes') as Promise<any[]>
+export function listNodes(): Promise<Node[]> {
+  return Api.get<Node[]>('/nodes') as unknown as Promise<Node[]>
 }
 
 export function deleteNode(id: string | number) {
@@ -108,7 +104,6 @@ export function updateNodeStatus(id: string | number, status: string) {
   return Api.put(`/nodes/${id}/status`, { status })
 }
 
-// Public peers (optional API key)
-export function getPeers() {
-  return Api.get('/peers') as Promise<any[]>
+export function getPeers(): Promise<Peer[]> {
+  return Api.get<Peer[]>('/peers') as unknown as Promise<Peer[]>
 }

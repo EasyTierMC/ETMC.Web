@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isAuthenticated, login } from '@/utils/request/api'
+import { getClientId, isAuthenticated, login } from '@/utils/request/api'
 import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
@@ -7,29 +7,31 @@ const route = useRoute()
 
 const loading = ref(false)
 
-onMounted(async ()=>{
+onMounted(async () => {
   const isLoggedIn = await isAuthenticated()
-  if(route.query.code&&typeof route.query.code === 'string'&&!isLoggedIn){
+  if (route.query.code && typeof route.query.code === 'string' && !isLoggedIn) {
     loading.value = true
-    login(route.query.code).then(res=>{
+    login(route.query.code).then(res => {
       sessionStorage.setItem('me',
         JSON.stringify({
           username: res.info.login,
           avatar: res.info.avatar_url
         })
       )
-      window.location.reload(); //为什么不直接跳转，问就是单页路由的锅
+      window.location.reload()
     })
   }
-  if(isLoggedIn){
+  if (isLoggedIn) {
     window.location.href = '/'
   }
 })
-// GitHub登录 - 直接跳转到后端处理的OAuth端点
+
 function loginWithGitHub() {
   loading.value = true
-  const thisUrl = window.location.href;
-  window.location.href = `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(thisUrl)}&client_id=Iv23liuQomBDjQIlOaYL`
+  const thisUrl = window.location.href
+  getClientId().then(cid => {
+    window.location.href = `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(thisUrl)}&client_id=${cid.clientId}`
+  })
 }
 </script>
 
