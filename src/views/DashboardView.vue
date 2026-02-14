@@ -4,12 +4,15 @@ import { useRouter } from 'vue-router'
 import NodeDetailModal from '@/components/dashboard/NodeDetailModal.vue'
 import NodeEditModal from '@/components/dashboard/NodeEditModal.vue'
 import ApiKeyCreateModal from '@/components/dashboard/ApiKeyCreateModal.vue'
+import ApiKeyDetailModal from '@/components/dashboard/ApiKeyDetailModal.vue'
+import ApiKeyEditModal from '@/components/dashboard/ApiKeyEditModal.vue'
 import {
   getProfile,
   listAdmins,
   deleteAdmin,
   listApiKeys,
   createApiKey,
+  updateApiKey,
   toggleApiKeyStatus,
   deleteApiKey,
   listNodes,
@@ -34,6 +37,8 @@ const editingNode = ref<any>(null)
 const apiKeys = ref<any[]>([])
 const loadingApiKeys = ref(false)
 const showApiKeyCreateModal = ref(false)
+const selectedApiKey = ref<any>(null)
+const editingApiKey = ref<any>(null)
 
 const userList = ref<any[]>([])
 const loadingAdmins = ref(false)
@@ -175,6 +180,25 @@ async function handleDeleteApiKey(id: string | number) {
     await fetchApiKeys()
   } catch (e: any) {
     alert('删除失败: ' + (e.message || e))
+  }
+}
+
+function showApiKeyDetail(apiKey: any) {
+  selectedApiKey.value = apiKey
+}
+
+function showApiKeyEdit(apiKey: any) {
+  editingApiKey.value = apiKey
+}
+
+async function handleUpdateApiKey(data: any) {
+  if (!editingApiKey.value) return
+  try {
+    await updateApiKey(editingApiKey.value.id, data)
+    editingApiKey.value = null
+    await fetchApiKeys()
+  } catch (e: any) {
+    alert('更新失败: ' + (e.message || e))
   }
 }
 
@@ -381,6 +405,8 @@ onMounted(async () => {
         <NodeDetailModal :node="selectedNode" :show="!!selectedNode" @close="closeNodeDetail" />
         <NodeEditModal :node="editingNode" :show="!!editingNode" @close="closeNodeEdit" @save="handleSaveNode" />
         <ApiKeyCreateModal :show="showApiKeyCreateModal" @close="showApiKeyCreateModal = false" @save="handleCreateApiKey" />
+        <ApiKeyDetailModal :api-key="selectedApiKey" :show="!!selectedApiKey" @close="selectedApiKey = null" />
+        <ApiKeyEditModal :api-key="editingApiKey" :show="!!editingApiKey" @close="editingApiKey = null" @save="handleUpdateApiKey" />
 
         <div v-show="activeTab === 'apiKeys'" class="h-full flex flex-col">
           <div class="card bg-base-100 shadow flex-1 flex flex-col">
@@ -404,22 +430,23 @@ onMounted(async () => {
                 <table class="table table-xs table-pin-rows">
                   <thead>
                     <tr>
-                      <th>ID</th>
-                      <th>API Key</th>
-                      <th>描述</th>
-                      <th>User-Agent</th>
-                      <th>状态</th>
-                      <th>操作</th>
+                      <th class="w-16">ID</th>
+                      <th class="w-48">API Key</th>
+                      <th class="w-32">名称</th>
+                      <th class="w-40">描述</th>
+                      <th class="w-32">User-Agent</th>
+                      <th class="w-20">状态</th>
+                      <th class="w-32">操作</th>
                     </tr>
                   </thead>
                   <tbody>
                     <tr v-if="loadingApiKeys">
-                      <td colspan="6" class="text-center">
+                      <td colspan="7" class="text-center">
                         <span class="loading loading-spinner loading-sm"></span>
                       </td>
                     </tr>
                     <tr v-else-if="apiKeys.length === 0">
-                      <td colspan="6" class="text-center text-base-content/60 py-4">
+                      <td colspan="7" class="text-center text-base-content/60 py-4">
                         <div class="flex flex-col items-center gap-2">
                           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
@@ -432,17 +459,18 @@ onMounted(async () => {
                       <td class="font-mono text-xs">{{ key.id }}</td>
                       <td>
                         <div class="flex items-center gap-1">
-                          <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono">{{ key.key }}</code>
-                          <button class="btn btn-ghost btn-[10px] btn-circle" @click="copyToClipboard(key.key)">
+                          <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono truncate max-w-32">{{ key.key }}</code>
+                          <button class="btn btn-ghost btn-[10px] btn-circle shrink-0" @click="copyToClipboard(key.key)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                             </svg>
                           </button>
                         </div>
                       </td>
-                      <td class="text-sm">{{ key.description }}</td>
+                      <td class="text-sm truncate max-w-24">{{ key.name }}</td>
+                      <td class="text-sm truncate max-w-32">{{ key.description || '-' }}</td>
                       <td>
-                        <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono">{{ key.ua || '-' }}</code>
+                        <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono truncate max-w-24 block">{{ key.ua || '-' }}</code>
                       </td>
                       <td>
                         <div class="badge badge-xs" :class="key.status === 'active' ? 'badge-success' : 'badge-ghost'">
@@ -451,6 +479,19 @@ onMounted(async () => {
                       </td>
                       <td>
                         <div class="flex gap-1">
+                          <button class="btn btn-ghost btn-xs" @click="showApiKeyDetail(key)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            详情
+                          </button>
+                          <button class="btn btn-ghost btn-xs" @click="showApiKeyEdit(key)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            编辑
+                          </button>
                           <button class="btn btn-ghost btn-xs" @click="handleToggleApiKeyStatus(key)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
