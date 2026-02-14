@@ -430,13 +430,13 @@ onMounted(async () => {
                 <table class="table table-xs table-pin-rows">
                   <thead>
                     <tr>
-                      <th class="w-16">ID</th>
-                      <th class="w-48">API Key</th>
-                      <th class="w-32">名称</th>
-                      <th class="w-40">描述</th>
-                      <th class="w-32">User-Agent</th>
-                      <th class="w-20">状态</th>
-                      <th class="w-32">操作</th>
+                      <th class="w-12">ID</th>
+                      <th class="w-36">API Key</th>
+                      <th class="w-24">名称</th>
+                      <th class="w-32">描述</th>
+                      <th class="w-28">User-Agent</th>
+                      <th class="w-16">状态</th>
+                      <th class="w-28">操作</th>
                     </tr>
                   </thead>
                   <tbody>
