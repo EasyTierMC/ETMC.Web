@@ -9,8 +9,6 @@ import ApiKeyDetailModal from '@/components/dashboard/ApiKeyDetailModal.vue'
 import ApiKeyEditModal from '@/components/dashboard/ApiKeyEditModal.vue'
 import {
   getProfile,
-  listAdmins,
-  deleteAdmin,
   listApiKeys,
   createApiKey,
   updateApiKey,
@@ -39,11 +37,6 @@ const loadingApiKeys = ref(false)
 const showApiKeyCreateModal = ref(false)
 const selectedApiKey = ref<any>(null)
 const editingApiKey = ref<any>(null)
-
-const userList = ref<any[]>([])
-const loadingAdmins = ref(false)
-
-const isAdmin = computed(() => currentUser.value?.username === 'admin')
 
 async function fetchUserInfo() {
   try {
@@ -218,29 +211,6 @@ async function handleUpdateApiKey(data: any) {
   }
 }
 
-async function fetchAdmins() {
-  if (!isAdmin.value) return
-  loadingAdmins.value = true
-  try {
-    const data = await listAdmins()
-    userList.value = data
-  } catch (e: any) {
-    console.error('获取管理员列表失败:', e)
-  } finally {
-    loadingAdmins.value = false
-  }
-}
-
-async function handleDeleteAdmin(id: string | number) {
-  if (!confirm('确定删除此管理员？')) return
-  try {
-    await deleteAdmin(id)
-    await fetchAdmins()
-  } catch (e: any) {
-    alert('删除失败: ' + (e.message || e))
-  }
-}
-
 function handleLogout() {
   logout()
   router.push('/login')
@@ -277,11 +247,10 @@ async function handleSaveNode(data: any) {
   }
 }
 
-function switchTab(tab: 'nodes' | 'apiKeys' | 'users') {
+function switchTab(tab: 'nodes' | 'apiKeys') {
   activeTab.value = tab
   if (tab === 'nodes' && nodeList.value.length === 0) fetchNodes()
   if (tab === 'apiKeys' && apiKeys.value.length === 0) fetchApiKeys()
-  if (tab === 'users' && userList.value.length === 0) fetchAdmins()
 }
 
 onMounted(async () => {
@@ -320,12 +289,6 @@ onMounted(async () => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
             </svg>
             API Keys
-          </a>
-          <a v-if="isAdmin" role="tab" class="tab gap-2 text-sm" :class="{ 'tab-active': activeTab === 'users' }" @click="switchTab('users')">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            管理员
           </a>
         </div>
       </div>
@@ -456,97 +419,6 @@ onMounted(async () => {
                             删除
                           </button>
                         </div>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="isAdmin" v-show="activeTab === 'users'" class="h-full flex flex-col">
-          <div class="card bg-base-100 shadow flex-1 flex flex-col">
-            <div class="card-body p-4 flex-1 flex flex-col overflow-hidden">
-              <h2 class="card-title text-base mb-3 shrink-0">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                管理员列表
-              </h2>
-              
-              <div class="flex-1 overflow-auto">
-                <table class="table table-xs table-pin-rows">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>用户信息</th>
-                      <th>Email</th>
-                      <th>创建时间</th>
-                      <th>更新时间</th>
-                      <th>操作</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="loadingAdmins">
-                      <td colspan="6" class="text-center">
-                        <span class="loading loading-spinner loading-sm"></span>
-                      </td>
-                    </tr>
-                    <tr v-else-if="userList.length === 0">
-                      <td colspan="6" class="text-center text-base-content/60 py-4">
-                        <div class="flex flex-col items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                          </svg>
-                          <span class="text-sm">暂无管理员</span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr v-else v-for="user in userList" :key="user.id">
-                      <td class="font-mono text-xs">{{ user.id }}</td>
-                      <td>
-                        <div class="flex items-center gap-2">
-                          <div class="avatar placeholder">
-                            <div class="bg-neutral text-neutral-content rounded-full w-8">
-                              <span class="text-xs">{{ user.username?.charAt(0).toUpperCase() }}</span>
-                            </div>
-                          </div>
-                          <div class="font-semibold text-sm">{{ user.username }}</div>
-                        </div>
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-0.5 text-xs">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                          </svg>
-                          {{ user.email }}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-0.5 text-xs">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
-                          {{ new Date(user.created_at).toLocaleDateString() }}
-                        </div>
-                      </td>
-                      <td>
-                        <div class="flex items-center gap-0.5 text-xs">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                          </svg>
-                          {{ new Date(user.updated_at).toLocaleDateString() }}
-                        </div>
-                      </td>
-                      <td>
-                        <button v-if="user.id !== currentUser?.id" class="btn btn-ghost btn-xs text-error" @click="handleDeleteAdmin(user.id)">
-                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          删除
-                        </button>
-                        <span v-else class="badge badge-ghost badge-xs">当前用户</span>
                       </td>
                     </tr>
                   </tbody>
