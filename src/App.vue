@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { ref, onMounted } from 'vue'
-import { isAuthenticated, getMe, logout } from '@/utils/request/api'
+import { isAuthenticated, getProfile, logout } from '@/utils/request/api'
 
 const year = new Date().getFullYear()
 const isLoggedIn = ref(false)
-const userInfo = ref<{ username?: string; avatar?: string } | null>(null)
+const userInfo = ref<{ login?: string; avatar_url?: string } | null>(null)
 
 onMounted(async () => {
   isLoggedIn.value = await isAuthenticated()
   
   if (isLoggedIn.value) {
     try {
-      const userData = getMe();
+      const userData = await getProfile();
       if(!userData) return;
-      userInfo.value = userData
+      userInfo.value = userData.data
     } catch (error) {
       console.error('Failed to fetch user info:', error)
     }
@@ -27,9 +27,9 @@ onMounted(async () => {
     isLoggedIn.value = await isAuthenticated()
     if (isLoggedIn.value) {
       try {
-        const userData = getMe()
+        const userData = await getProfile()
         if(!userData) return;
-        userInfo.value = userData
+        userInfo.value = userData.data
       } catch (error) {
         console.error('Failed to fetch user info:', error)
       }
@@ -63,12 +63,12 @@ const handleLogout = () => {
           <div class="avatar">
             <div class="w-8 h-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
               <img 
-                :src="userInfo.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.username || 'User')}&background=random`" 
-                :alt="userInfo.username || 'User'"
+                :src="userInfo.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userInfo.login || 'User')}&background=random`" 
+                :alt="userInfo.login || 'User'"
               />
             </div>
           </div>
-          <span class="font-medium text-sm">{{ userInfo.username || '用户' }}</span>
+          <span class="font-medium text-sm">{{ userInfo.login || '用户' }}</span>
           <div class="dropdown dropdown-end">
             <label tabindex="0" class="btn btn-ghost btn-circle btn-xs">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

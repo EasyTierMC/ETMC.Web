@@ -15,7 +15,7 @@ Api.interceptors.request.use(
       const token = await window.cookieStore.get('auth_token')
       if (token) {
         config.headers = config.headers || {}
-        config.headers.Authorization = `Bearer ${token.value}`
+        config.headers.Authorization = token.value
       }
     }
     return config

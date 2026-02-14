@@ -5,18 +5,21 @@ export interface HealthResponse {
 }
 
 export interface IClientId {
-  clientId: string
+  data: {
+    client_id: string
+  }
 }
 
-export interface IMe {
-  username: string
-  avatar: string
+export interface IProfile {
+  data:{
+    login: string
+    avatar_url: string
+  }
 }
 
 export interface ILogin {
-  info: {
-    login: string
-    avatar_url: string
+  data:{
+    token: string
   }
 }
 

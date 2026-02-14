@@ -2,7 +2,7 @@
 import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import {
-  getMe,
+  getProfile,
   listAdmins,
   deleteAdmin,
   listApiKeys,
@@ -43,7 +43,7 @@ const isAdmin = computed(() => currentUser.value?.username === 'admin')
 
 async function fetchUserInfo() {
   try {
-    const me = await getMe()
+    const me = await getProfile()
     currentUser.value = me
   } catch (e: any) {
     console.error(e);
