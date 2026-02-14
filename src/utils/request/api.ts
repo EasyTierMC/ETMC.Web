@@ -98,6 +98,10 @@ export function deleteApiKey(id: string | number) {
   return Api.delete(`/api-keys/${id}`);
 }
 
+export function updateApiKey(id: string | number, data: Partial<ApiKey>) {
+  return Api.put(`/api-keys/${id}`, data);
+}
+
 export function createNode(data: Partial<Node>) {
   return Api.post("/nodes", data);
 }
@@ -108,6 +112,10 @@ export function listNodes(): Promise<Node[]> {
 
 export function deleteNode(id: string | number) {
   return Api.delete(`/nodes/${id}`);
+}
+
+export function updateNode(id: string | number, data: Partial<Node>) {
+  return Api.put(`/nodes/${id}`, data);
 }
 
 export function updateNodeStatus(id: string | number, status: string) {
