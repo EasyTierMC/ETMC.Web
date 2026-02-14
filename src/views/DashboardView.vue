@@ -7,7 +7,6 @@ import NodeCard from '@/components/dashboard/NodeCard.vue'
 import ApiKeyCreateModal from '@/components/dashboard/ApiKeyCreateModal.vue'
 import ApiKeyDetailModal from '@/components/dashboard/ApiKeyDetailModal.vue'
 import ApiKeyEditModal from '@/components/dashboard/ApiKeyEditModal.vue'
-import ApiKeyRow from '@/components/dashboard/ApiKeyRow.vue'
 import {
   getProfile,
   listAdmins,
@@ -414,7 +413,50 @@ onMounted(async () => {
                       </td>
                     </tr>
                     <tr v-else v-for="key in apiKeys" :key="key.id">
-                      <ApiKeyRow :api-key="key" @detail="showApiKeyDetail" @edit="showApiKeyEdit" @delete="handleDeleteApiKey" />
+                      <td class="font-mono text-xs">{{ key.id }}</td>
+                      <td>
+                        <div class="flex items-center gap-1">
+                          <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono truncate max-w-32">{{ key.key }}</code>
+                          <button class="btn btn-ghost btn-[10px] btn-circle shrink-0" @click="copyToClipboard(key.key)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                            </svg>
+                          </button>
+                        </div>
+                      </td>
+                      <td class="text-sm truncate max-w-24">{{ key.name }}</td>
+                      <td class="text-sm truncate max-w-32">{{ key.description || '-' }}</td>
+                      <td>
+                        <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono truncate max-w-24 block">{{ key.ua || '-' }}</code>
+                      </td>
+                      <td>
+                        <div class="badge badge-xs" :class="key.status === 'active' ? 'badge-success' : 'badge-ghost'">
+                          {{ key.status === 'active' ? '启用' : '禁用' }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="flex gap-1">
+                          <button class="btn btn-ghost btn-xs" @click="showApiKeyDetail(key)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            详情
+                          </button>
+                          <button class="btn btn-ghost btn-xs" @click="showApiKeyEdit(key)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            编辑
+                          </button>
+                          <button class="btn btn-ghost btn-xs text-error" @click="handleDeleteApiKey(key.id)">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            删除
+                          </button>
+                        </div>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
