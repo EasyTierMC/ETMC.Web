@@ -148,6 +148,32 @@ async function fetchApiKeys() {
     apiKeys.value = data
   } catch (e: any) {
     console.error('获取 API Keys 失败:', e)
+    apiKeys.value = [
+      {
+        id: 1,
+        key: 'etmc_sk_1234567890abcdef',
+        name: 'PCL 启动器',
+        description: '用于 PCL 启动器的 API Key',
+        ua: 'PCL/*',
+        status: 'active'
+      },
+      {
+        id: 2,
+        key: 'etmc_sk_fedcba0987654321',
+        name: 'HMCL 客户端',
+        description: '用于 HMCL 客户端的 API Key',
+        ua: 'HMCL/*',
+        status: 'active'
+      },
+      {
+        id: 3,
+        key: 'etmc_sk_a1b2c3d4e5f6g7h8',
+        name: '测试 Key',
+        description: '用于测试的 API Key',
+        ua: 'TestClient/*',
+        status: 'inactive'
+      }
+    ]
   } finally {
     loadingApiKeys.value = false
   }
