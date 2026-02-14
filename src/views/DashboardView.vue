@@ -13,7 +13,6 @@ import {
   listApiKeys,
   createApiKey,
   updateApiKey,
-  toggleApiKeyStatus,
   deleteApiKey,
   listNodes,
   deleteNode,
@@ -186,16 +185,6 @@ async function handleCreateApiKey(data: any) {
     await fetchApiKeys()
   } catch (e: any) {
     alert('创建 API Key 失败: ' + (e.message || e))
-  }
-}
-
-async function handleToggleApiKeyStatus(key: any) {
-  try {
-    const newStatus = key.status === 'active' ? 'inactive' : 'active'
-    await toggleApiKeyStatus(key.id, newStatus)
-    await fetchApiKeys()
-  } catch (e: any) {
-    alert('更新状态失败: ' + (e.message || e))
   }
 }
 
@@ -517,12 +506,6 @@ onMounted(async () => {
                               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                             </svg>
                             编辑
-                          </button>
-                          <button class="btn btn-ghost btn-xs" @click="handleToggleApiKeyStatus(key)">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            切换
                           </button>
                           <button class="btn btn-ghost btn-xs text-error" @click="handleDeleteApiKey(key.id)">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
