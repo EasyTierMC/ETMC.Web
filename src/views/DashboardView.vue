@@ -3,6 +3,7 @@ import { onMounted, ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import NodeDetailModal from '@/components/dashboard/NodeDetailModal.vue'
 import NodeEditModal from '@/components/dashboard/NodeEditModal.vue'
+import ApiKeyCreateModal from '@/components/dashboard/ApiKeyCreateModal.vue'
 import {
   getProfile,
   listAdmins,
@@ -32,8 +33,7 @@ const editingNode = ref<any>(null)
 
 const apiKeys = ref<any[]>([])
 const loadingApiKeys = ref(false)
-const showApiKeyForm = ref(false)
-const apiKeyForm = ref({ name: '', rateLimit: 100 })
+const showApiKeyCreateModal = ref(false)
 
 const userList = ref<any[]>([])
 const loadingAdmins = ref(false)
@@ -148,12 +148,10 @@ async function fetchApiKeys() {
   }
 }
 
-async function handleCreateApiKey() {
-  if (!apiKeyForm.value.name) return
+async function handleCreateApiKey(data: any) {
   try {
-    await createApiKey(apiKeyForm.value)
-    apiKeyForm.value = { name: '', rateLimit: 100 }
-    showApiKeyForm.value = false
+    await createApiKey(data)
+    showApiKeyCreateModal.value = false
     await fetchApiKeys()
   } catch (e: any) {
     alert('创建 API Key 失败: ' + (e.message || e))
@@ -382,6 +380,7 @@ onMounted(async () => {
 
         <NodeDetailModal :node="selectedNode" :show="!!selectedNode" @close="closeNodeDetail" />
         <NodeEditModal :node="editingNode" :show="!!editingNode" @close="closeNodeEdit" @save="handleSaveNode" />
+        <ApiKeyCreateModal :show="showApiKeyCreateModal" @close="showApiKeyCreateModal = false" @save="handleCreateApiKey" />
 
         <div v-show="activeTab === 'apiKeys'" class="h-full flex flex-col">
           <div class="card bg-base-100 shadow flex-1 flex flex-col">
@@ -393,42 +392,12 @@ onMounted(async () => {
                   </svg>
                   API Key 列表
                 </h2>
-                <button class="btn btn-primary btn-sm gap-2" @click="showApiKeyForm = !showApiKeyForm">
+                <button class="btn btn-primary btn-sm gap-2" @click="showApiKeyCreateModal = true">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  {{ showApiKeyForm ? '取消' : '创建 API Key' }}
+                  创建 API Key
                 </button>
-              </div>
-
-              <div v-if="showApiKeyForm" class="collapse collapse-open bg-base-200 mb-3 shrink-0">
-                <div class="collapse-title text-sm font-medium">
-                  创建新 API Key
-                </div>
-                <div class="collapse-content">
-                  <form @submit.prevent="handleCreateApiKey" class="grid gap-3">
-                    <div class="form-control">
-                      <label class="label py-1">
-                        <span class="label-text text-xs">API Key 名称</span>
-                      </label>
-                      <input v-model="apiKeyForm.name" type="text" placeholder="输入 API Key 名称"
-                        class="input input-bordered input-sm w-full" required />
-                    </div>
-                    <div class="form-control">
-                      <label class="label py-1">
-                        <span class="label-text text-xs">速率限制（次/分钟）</span>
-                      </label>
-                      <input v-model.number="apiKeyForm.rateLimit" type="number" placeholder="默认: 100"
-                        class="input input-bordered input-sm w-full" min="1" />
-                    </div>
-                    <button type="submit" class="btn btn-primary btn-sm w-full">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      创建
-                    </button>
-                  </form>
-                </div>
               </div>
 
               <div class="flex-1 overflow-auto">
@@ -438,7 +407,7 @@ onMounted(async () => {
                       <th>ID</th>
                       <th>API Key</th>
                       <th>描述</th>
-                      <th>速率限制</th>
+                      <th>User-Agent</th>
                       <th>状态</th>
                       <th>操作</th>
                     </tr>
@@ -473,11 +442,11 @@ onMounted(async () => {
                       </td>
                       <td class="text-sm">{{ key.description }}</td>
                       <td>
-                        <div class="badge badge-outline badge-xs">{{ key.rate_limit }}/min</div>
+                        <code class="bg-base-200 px-1.5 py-0.5 rounded text-[10px] font-mono">{{ key.ua || '-' }}</code>
                       </td>
                       <td>
                         <div class="badge badge-xs" :class="key.status === 'active' ? 'badge-success' : 'badge-ghost'">
-                          {{ key.is_active }}
+                          {{ key.status === 'active' ? '启用' : '禁用' }}
                         </div>
                       </td>
                       <td>
