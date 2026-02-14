@@ -110,6 +110,10 @@ export function deleteNode(id: string | number) {
   return Api.delete(`/nodes/${id}`);
 }
 
+export function updateNode(id: string | number, data: Partial<Node>) {
+  return Api.put(`/nodes/${id}`, data);
+}
+
 export function updateNodeStatus(id: string | number, status: string) {
   return Api.put(`/nodes/${id}/status`, { status });
 }
