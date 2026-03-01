@@ -1,7 +1,7 @@
 <template>
-  <div class="min-h-screen bg-linear-to-br from-base-200 via-base-100 to-base-200">
+  <div class="min-h-screen bg-linear-to-br from-base-200 via-base-100 to-base-200 rounded-xl">
     <!-- Hero Section with Stats Cards -->
-    <section class="hero min-h-[25vh] lg:min-h-[30vh] bg-base-100/80 backdrop-blur-sm">
+    <section class="hero min-h-[25vh] lg:min-h-[30vh] bg-base-100/80 backdrop-blur-sm rounded-xl">
       <div class="hero-content text-center px-4">
         <div class="w-full max-w-7xl">
           <!-- Stats Cards -->
@@ -54,10 +54,10 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import Map from '@/components/dashboard/Map.vue';
+import { getGlobalNodeStatus, type GlobalNodeStatus } from '@/utils/request/api';
 
-// 定义节点数据接口
 interface NodeStat {
   title: string;
   value: string;
@@ -67,20 +67,40 @@ interface NodeStat {
   bgColorClass: string;
 }
 
-// 节点统计数据
+const globalStatus = ref<GlobalNodeStatus>({
+  totalNodes: 0,
+  onlineNodes: 0,
+  deployedNodes: 0,
+  connections: 0,
+  maxConnections: 0
+});
+
+const fetchGlobalStatus = async () => {
+  try {
+    const response = await getGlobalNodeStatus();
+    globalStatus.value = response;
+  } catch (error) {
+    console.error('Failed to fetch global node status:', error);
+  }
+};
+
+onMounted(() => {
+  fetchGlobalStatus();
+});
+
 const nodeStats = computed<NodeStat[]>(() => {
-  const totalLoad = 75; // 总负载值
+  const { totalNodes, onlineNodes, deployedNodes, connections, maxConnections } = globalStatus.value;
+  const loadPercent = maxConnections > 0 ? Math.round((connections / maxConnections) * 100) : 0;
   
-  // 根据负载值确定颜色
   let loadColorClass = 'text-success';
   let loadBgColorClass = 'bg-success/10';
   let loadIconPath = 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z';
   
-  if (totalLoad > 100) {
+  if (loadPercent > 100) {
     loadColorClass = 'text-error';
     loadBgColorClass = 'bg-error/10';
     loadIconPath = 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-  } else if (totalLoad > 75) {
+  } else if (loadPercent > 75) {
     loadColorClass = 'text-warning';
     loadBgColorClass = 'bg-warning/10';
     loadIconPath = 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z';
@@ -89,7 +109,7 @@ const nodeStats = computed<NodeStat[]>(() => {
   return [
     {
       title: '总节点数',
-      value: '211',
+      value: String(totalNodes),
       subtitle: '全球部署',
       iconPath: 'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01',
       colorClass: 'text-primary',
@@ -97,7 +117,7 @@ const nodeStats = computed<NodeStat[]>(() => {
     },
     {
       title: '在线节点数',
-      value: '205',
+      value: String(onlineNodes),
       subtitle: '正常运行',
       iconPath: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z',
       colorClass: 'text-success',
@@ -105,7 +125,7 @@ const nodeStats = computed<NodeStat[]>(() => {
     },
     {
       title: '调配节点数',
-      value: '42',
+      value: String(deployedNodes),
       subtitle: '负载均衡',
       iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
       colorClass: 'text-warning',
@@ -113,7 +133,7 @@ const nodeStats = computed<NodeStat[]>(() => {
     },
     {
       title: '连接状态',
-      value: '211/114',
+      value: `${connections}/${maxConnections}`,
       subtitle: '活跃连接',
       iconPath: 'M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z',
       colorClass: 'text-info',
@@ -121,7 +141,7 @@ const nodeStats = computed<NodeStat[]>(() => {
     },
     {
       title: '总负载',
-      value: `${totalLoad}%`,
+      value: `${loadPercent}%`,
       subtitle: '系统负载',
       iconPath: loadIconPath,
       colorClass: loadColorClass,

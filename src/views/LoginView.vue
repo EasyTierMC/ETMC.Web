@@ -4,24 +4,28 @@ import { onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 const route = useRoute()
 
-
 const loading = ref(false)
 
 onMounted(async () => {
   const isLoggedIn = await isAuthenticated()
-  if (route.query.code && typeof route.query.code === 'string' && !isLoggedIn) {
-    loading.value = true
-    login(route.query.code).then(res => {
-      if (typeof window !== 'undefined' && window.cookieStore) {
-        window.cookieStore.set('auth_token', res.data.token)
-      }
-      getProfile().then(() => {
-        window.location.reload()
-      })
-    })
-  }
   if (isLoggedIn) {
     window.location.href = '/'
+    return
+  }
+  if (route.query.code && typeof route.query.code === 'string') {
+    loading.value = true
+    login(route.query.code).then(res => {
+      if (typeof window !== 'undefined' && window.cookieStore && res.data) {
+        window.cookieStore.set({
+          name: 'auth_token',
+          value: res.data.token,
+          expires: Date.now() + res.data.ttl,
+        })
+      }
+      getProfile().then(() => {
+        window.location.href = '/'
+      })
+    })
   }
 })
 
@@ -29,15 +33,15 @@ function loginWithGitHub() {
   loading.value = true
   const thisUrl = window.location.href
   getClientId().then(cid => {
-    console.log(cid)
-    window.location.href = `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(thisUrl)}&client_id=${cid.data.client_id}`
+    if (cid.data) {
+      window.location.href = `https://github.com/login/oauth/authorize?response_type=code&redirect_uri=${encodeURIComponent(thisUrl)}&client_id=${cid.data.client_id}`
+    }
   })
 }
 </script>
 
 <template>
   <div class="min-h-[calc(100vh-200px)] flex items-center justify-center">
-    <!-- 装饰 -->
     <div class="fixed inset-0 overflow-hidden pointer-events-none">
       <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/20 rounded-full blur-3xl"></div>
       <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/20 rounded-full blur-3xl"></div>
@@ -77,5 +81,3 @@ function loginWithGitHub() {
     </div>
   </div>
 </template>
-
-<style scoped></style>

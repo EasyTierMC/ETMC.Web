@@ -1,0 +1,2609 @@
+openapi: 3.0.3
+info:
+  title: EasyTierMC.Uptime API Documentation
+  description: EasyTierMC.Uptime API
+  version: 1.0.0
+paths:
+  /api/oauth/clientId:
+    get:
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - client_id
+                    properties:
+                      client_id:
+                        type: string
+      operationId: getApiOauthClientId
+  /api/oauth/callback:
+    post:
+      parameters:
+        - name: code
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - token
+                      - ttl
+                    properties:
+                      token:
+                        type: string
+                      ttl:
+                        type: number
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: postApiOauthCallback
+  /api/oauth/profile:
+    get:
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      operationId: getApiOauthProfile
+  /api/admin/users/:
+    get:
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: offset
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: role
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - admin
+              - user
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - uuid
+                        - username
+                        - githubId
+                        - avatarUrl
+                        - role
+                        - lastLoginAt
+                        - registeredAt
+                      properties:
+                        uuid:
+                          type: string
+                        username:
+                          type: string
+                        githubId:
+                          type: number
+                        avatarUrl:
+                          type: string
+                        role:
+                          type: string
+                          enum:
+                            - admin
+                            - user
+                        lastLoginAt:
+                          type: string
+                        registeredAt:
+                          type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiAdminUsers
+  /api/admin/users/{uuid}:
+    delete:
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: User deleted
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: deleteApiAdminUsersByUuid
+  /api/admin/users/role/{uuid}:
+    put:
+      parameters:
+        - name: uuid
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - role
+              properties:
+                role:
+                  type: string
+                  enum:
+                    - admin
+                    - user
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: User role updated
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiAdminUsersRoleByUuid
+  /api/admin/apikey/:
+    get:
+      parameters:
+        - name: limit
+          in: query
+          required: true
+          schema:
+            minimum: 1
+            maximum: 100
+            type: number
+        - name: offset
+          in: query
+          required: true
+          schema:
+            minimum: 0
+            type: number
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - active
+              - pending
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - description
+                        - userAgent
+                        - providerUuid
+                        - type
+                        - createdAt
+                        - provider
+                      properties:
+                        id:
+                          type: number
+                        name:
+                          type: string
+                        description:
+                          nullable: true
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        userAgent:
+                          type: string
+                        providerUuid:
+                          type: number
+                        type:
+                          type: string
+                          enum:
+                            - active
+                            - pending
+                        createdAt:
+                          type: string
+                        provider:
+                          type: object
+                          required:
+                            - username
+                            - githubId
+                          properties:
+                            username:
+                              type: string
+                            githubId:
+                              type: number
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiAdminApikey
+  /api/admin/apikey/{id}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: Apikey deleted
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "404":
+          description: Response for status 404
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 404
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Apikey not found
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: deleteApiAdminApikeyById
+  /api/admin/apikey/type/{id}:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - active
+                    - pending
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - active
+                    - pending
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - type
+              properties:
+                type:
+                  type: string
+                  enum:
+                    - active
+                    - pending
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: Apikey type updated
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "404":
+          description: Response for status 404
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 404
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Apikey not found
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiAdminApikeyTypeById
+  /api/admin/nodes/:
+    get:
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            default: 30
+            type: number
+        - name: offset
+          in: query
+          required: false
+          schema:
+            default: 0
+            type: number
+        - name: isReviewed
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: isPublic
+          in: query
+          required: false
+          schema:
+            type: boolean
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                  - total
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - description
+                        - providerUuid
+                        - providerName
+                        - isReviewed
+                        - isPublic
+                        - status
+                        - connections
+                        - maxConnections
+                        - createdAt
+                      properties:
+                        id:
+                          type: number
+                        name:
+                          type: string
+                        description:
+                          nullable: true
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        providerUuid:
+                          type: number
+                        providerName:
+                          type: string
+                        isReviewed:
+                          type: boolean
+                        isPublic:
+                          type: boolean
+                        status:
+                          type: string
+                        connections:
+                          type: number
+                        maxConnections:
+                          type: number
+                        createdAt:
+                          type: string
+                  total:
+                    type: number
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiAdminNodes
+  /api/admin/nodes/review/{id}:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isReviewed
+              properties:
+                isReviewed:
+                  type: boolean
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - isReviewed
+              properties:
+                isReviewed:
+                  type: boolean
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - isReviewed
+              properties:
+                isReviewed:
+                  type: boolean
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: Node review status updated
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "404":
+          description: Response for status 404
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 404
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Node not found
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiAdminNodesReviewById
+  /api/admin/nodes/public/{id}:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isPublic
+              properties:
+                isPublic:
+                  type: boolean
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - isPublic
+              properties:
+                isPublic:
+                  type: boolean
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - isPublic
+              properties:
+                isPublic:
+                  type: boolean
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: Node public status updated
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "404":
+          description: Response for status 404
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 404
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Node not found
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiAdminNodesPublicById
+  /api/admin/nodes/{id}:
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  message:
+                    const: Node deleted
+                    type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "404":
+          description: Response for status 404
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 404
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Node not found
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: deleteApiAdminNodesById
+  /api/nodes/:
+    post:
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: "null"
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: postApiNodes
+    get:
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: number
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiNodes
+  /api/nodes/me:
+    get:
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    type: boolean
+                  data: {}
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiNodesMe
+  /api/nodes/status/global:
+    get:
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    type: boolean
+                  data: {}
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiNodesStatusGlobal
+  /api/nodes/{nodeId}:
+    put:
+      parameters:
+        - name: nodeId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - host
+                - port
+                - protocol
+                - isRelay
+                - maximumBandwidth
+                - network
+                - contact
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                host:
+                  type: string
+                port:
+                  type: number
+                protocol:
+                  type: string
+                  enum:
+                    - tcp
+                    - udp
+                    - ws
+                    - wss
+                isRelay:
+                  type: boolean
+                maximumBandwidth:
+                  type: number
+                network:
+                  type: object
+                  required:
+                    - name
+                    - secret
+                  properties:
+                    name:
+                      type: string
+                    secret:
+                      type: string
+                contact:
+                  type: object
+                  required:
+                    - email
+                    - qq
+                  properties:
+                    email:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+                    qq:
+                      nullable: true
+                      anyOf:
+                        - type: string
+                        - type: "null"
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: "null"
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiNodesByNodeId
+  /api/apikey/register:
+    post:
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: "null"
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  data:
+                    const: Internal Server Error
+                    type: string
+      operationId: postApiApikeyRegister
+  /api/apikey/{id}:
+    put:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - description
+                - userAgent
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                userAgent:
+                  type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: "null"
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  data:
+                    const: Internal Server Error
+                    type: string
+      operationId: putApiApikeyById
+    delete:
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: "null"
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  data:
+                    const: Internal Server Error
+                    type: string
+      operationId: deleteApiApikeyById
+  /api/apikey/my:
+    get:
+      parameters:
+        - name: authorization
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - id
+                        - name
+                        - description
+                        - userAgent
+                        - providerUuid
+                        - createdAt
+                      properties:
+                        id:
+                          type: number
+                        name:
+                          type: string
+                        description:
+                          nullable: true
+                          anyOf:
+                            - type: string
+                            - type: "null"
+                        userAgent:
+                          type: string
+                        providerUuid:
+                          type: number
+                        createdAt:
+                          anyOf:
+                            - type: Date
+                            - format: date-time
+                              type: string
+                            - format: date
+                              type: string
+                            - type: number
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  data:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiApikeyMy
+  /api/cluster/challenge:
+    get:
+      parameters:
+        - name: clusterId
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: user-agent
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - challenge
+                    properties:
+                      challenge:
+                        type: string
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: getApiClusterChallenge
+  /api/cluster/token:
+    post:
+      parameters:
+        - name: user-agent
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - challenge
+                - signature
+              properties:
+                clusterId:
+                  type: string
+                challenge:
+                  type: string
+                signature:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - challenge
+                - signature
+              properties:
+                clusterId:
+                  type: string
+                challenge:
+                  type: string
+                signature:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - challenge
+                - signature
+              properties:
+                clusterId:
+                  type: string
+                challenge:
+                  type: string
+                signature:
+                  type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - token
+                      - ttl
+                    properties:
+                      token:
+                        type: string
+                      ttl:
+                        type: number
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: postApiClusterToken
+  /api/cluster/refresh:
+    post:
+      parameters:
+        - name: user-agent
+          in: header
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - token
+              properties:
+                clusterId:
+                  type: string
+                token:
+                  type: string
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - token
+              properties:
+                clusterId:
+                  type: string
+                token:
+                  type: string
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - clusterId
+                - token
+              properties:
+                clusterId:
+                  type: string
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Response for status 200
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - data
+                properties:
+                  status:
+                    const: 200
+                    type: number
+                  success:
+                    const: true
+                    type: boolean
+                  data:
+                    type: object
+                    required:
+                      - token
+                      - ttl
+                    properties:
+                      token:
+                        type: string
+                      ttl:
+                        type: number
+        "403":
+          description: Response for status 403
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 403
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Forbidden
+                    type: string
+        "500":
+          description: Response for status 500
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - status
+                  - success
+                  - message
+                properties:
+                  status:
+                    const: 500
+                    type: number
+                  success:
+                    const: false
+                    type: boolean
+                  message:
+                    const: Internal Server Error
+                    type: string
+      operationId: postApiClusterRefresh
+components:
+  schemas: {}
