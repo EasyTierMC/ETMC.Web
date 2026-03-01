@@ -54,6 +54,7 @@ onMounted(async () => {
   const data = await listNodes()
   nodes.value = data.map((n: any) => {
     const latest = n.nodeStatuses?.[0]
+    const nodeInfo = n.nodeInfo?.[0]
     const status = latest?.status
     let nodeStatus: 'online' | 'offline' | 'pending' = 'pending'
     if (status === 'online') nodeStatus = 'online'
@@ -63,6 +64,7 @@ onMounted(async () => {
       maxConnections: latest?.maxConnections ?? 100,
       currentConnections: latest?.connections ?? 0,
       isOnline: status === 'online',
+      isRelay: nodeInfo?.isRelay ?? false,
       nodeStatus,
       loadScore: calculateLoadScore(latest?.maxConnections ?? 100, latest?.connections ?? 0),
       createdAt: n.createdAt instanceof Date ? n.createdAt : new Date(n.createdAt)

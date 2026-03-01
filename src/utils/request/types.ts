@@ -164,6 +164,7 @@ export interface NodeView {
   id: number
   name: string
   isOnline: boolean
+  isRelay: boolean
   maxConnections: number
   currentConnections: number
   loadScore: number

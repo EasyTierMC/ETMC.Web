@@ -43,6 +43,8 @@ defineProps<{ node: NodeView & { nodeStatus?: 'online' | 'offline' | 'pending' }
       </div>
 
       <div class="flex items-center gap-2 flex-1 min-w-[280px]">
+        <span v-if="node.isRelay" class="badge badge-primary badge-sm">中继</span>
+        <span v-else class="badge badge-accent badge-sm">打洞</span>
         <span v-for="tag in node.tags" :key="tag" class="badge badge-secondary">{{ tag }}</span>
         <span
           class="badge badge-ghost badge-sm"
