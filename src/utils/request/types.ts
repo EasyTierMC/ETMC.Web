@@ -181,7 +181,24 @@ export interface Peer {
   [key: string]: any
 }
 
+export interface HourlyData {
+  hour: number
+  onlineNodes: number
+  deployedNodes: number
+  connections: number
+  maxConnections: number
+}
+
 export interface GlobalNodeStatus {
+  totalNodes: number
+  onlineNodes: number
+  deployedNodes: number
+  connections: number
+  maxConnections: number
+}
+
+export interface GlobalNodeStatusWithHourly {
+  hourly: HourlyData[]
   totalNodes: number
   onlineNodes: number
   deployedNodes: number

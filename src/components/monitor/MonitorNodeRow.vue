@@ -27,7 +27,7 @@ defineProps<{ node: NodeView & { nodeStatus?: 'online' | 'offline' | 'pending' }
             <div
               class="h-2.5 rounded-full transition-all duration-300"
               :class="getLoadScoreBarColor(node.loadScore)"
-              :style="{ width: `${node.loadScore}%` }"
+              :style="{ width: `${Math.min(node.loadScore, 100)}%` }"
             ></div>
           </div>
           <span class="text-sm font-bold min-w-[45px] text-right" :class="getLoadScoreColor(node.loadScore)">

@@ -14,6 +14,8 @@ import type {
   AdminNodeData,
   AdminNodeListResponse,
   GlobalNodeStatus,
+  GlobalNodeStatusWithHourly,
+  HourlyData,
   ClusterChallengeData,
   ClusterTokenData,
   ClusterTokenRequest,
@@ -36,6 +38,8 @@ export type {
   AdminNodeData,
   AdminNodeListResponse,
   GlobalNodeStatus,
+  GlobalNodeStatusWithHourly,
+  HourlyData,
   ClusterChallengeData,
   ClusterTokenData,
   ClusterTokenRequest,
@@ -227,7 +231,7 @@ export function deleteNode(id: string | number) {
 }
 
 export function getGlobalNodeStatus() {
-  return Api.get<GlobalNodeStatus>("/nodes/status/global").then(res => res.data!);
+  return Api.get<GlobalNodeStatusWithHourly>("/nodes/status/global").then(res => res.data!);
 }
 
 export function getClusterChallenge(clusterId: string) {

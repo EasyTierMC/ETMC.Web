@@ -15,7 +15,7 @@ export function formatDateShort(date: Date): string {
 }
 
 export function calculateLoadScore(max: number, current: number): number {
-  return max === 0 ? 0 : Math.min((current / max) * 100, 100)
+  return max === 0 ? 0 : (current / max) * 100
 }
 
 export function getLoadScoreColor(score: number): string {
