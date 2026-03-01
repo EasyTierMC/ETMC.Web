@@ -53,6 +53,7 @@ function toggleSortOrder() {
       >
         <option value="all">全部状态</option>
         <option value="online">在线</option>
+        <option value="pending">等待调配</option>
         <option value="offline">离线</option>
       </select>
 

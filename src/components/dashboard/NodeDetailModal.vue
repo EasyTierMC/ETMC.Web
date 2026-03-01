@@ -14,6 +14,29 @@ const emit = defineEmits<{
 
 const nodeInfo = computed(() => props.node?.nodeInfo?.[0] || {})
 
+const nodeStatus = computed(() => {
+  const status = props.node?.nodeStatuses?.[0]?.status
+  if (status === 'online') return 'online'
+  if (status === 'offline') return 'offline'
+  return 'pending'
+})
+
+const statusText = computed(() => {
+  switch (nodeStatus.value) {
+    case 'online': return '在线'
+    case 'offline': return '离线'
+    default: return '等待调配'
+  }
+})
+
+const statusBadgeClass = computed(() => {
+  switch (nodeStatus.value) {
+    case 'online': return 'badge-success'
+    case 'offline': return 'badge-error'
+    default: return 'badge-warning'
+  }
+})
+
 const formattedDate = computed(() => {
   if (!props.node?.createdAt) return '-'
   return new Date(props.node.createdAt).toLocaleString()
@@ -56,11 +79,8 @@ function handleClose() {
           </div>
           <div class="space-y-1">
             <label class="text-xs text-base-content/60">状态</label>
-            <div class="badge badge-sm" :class="{
-              'badge-success': node.isOnline === true,
-              'badge-error': node.isOnline === false
-            }">
-              {{ node.isOnline === true ? '在线' : '离线' }}
+            <div class="badge badge-sm" :class="statusBadgeClass">
+              {{ statusText }}
             </div>
           </div>
           <div class="space-y-1">

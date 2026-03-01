@@ -7,7 +7,11 @@ import MonitorFilters from '@/components/monitor/MonitorFilters.vue'
 import MonitorNodeRow from '@/components/monitor/MonitorNodeRow.vue'
 import MonitorPagination from '@/components/monitor/MonitorPagination.vue'
 
-const nodes = ref<NodeView[]>([])
+interface ExtendedNodeView extends NodeView {
+  nodeStatus: 'online' | 'offline' | 'pending'
+}
+
+const nodes = ref<ExtendedNodeView[]>([])
 const searchQuery = ref('')
 const statusFilter = ref('all')
 const selectedTags = ref<string[]>([])
@@ -20,7 +24,7 @@ const pageSizeOptions = [10, 30, 50, 100, 200]
 const availableTags = computed(() => [...new Set(nodes.value.flatMap(n => n.tags))].sort())
 
 const filteredAndSortedNodes = computed(() => {
-  const sortMethods: Record<string, (a: NodeView, b: NodeView) => number> = {
+  const sortMethods: Record<string, (a: ExtendedNodeView, b: ExtendedNodeView) => number> = {
     name: (a, b) => a.name.localeCompare(b.name, 'zh-CN'),
     id: (a, b) => a.id - b.id,
     load: (a, b) => a.loadScore - b.loadScore,
@@ -31,8 +35,9 @@ const filteredAndSortedNodes = computed(() => {
     .filter(n =>
       n.name.toLowerCase().includes(searchQuery.value.toLowerCase()) &&
       (statusFilter.value === 'all' ||
-        (statusFilter.value === 'online' && n.isOnline) ||
-        (statusFilter.value === 'offline' && !n.isOnline)) &&
+        (statusFilter.value === 'online' && n.nodeStatus === 'online') ||
+        (statusFilter.value === 'offline' && n.nodeStatus === 'offline') ||
+        (statusFilter.value === 'pending' && n.nodeStatus === 'pending')) &&
       (selectedTags.value.length === 0 || selectedTags.value.some(t => n.tags.includes(t)))
     )
     .sort((a, b) => {
@@ -49,11 +54,16 @@ onMounted(async () => {
   const data = await listNodes()
   nodes.value = data.map((n: any) => {
     const latest = n.nodeStatuses?.[0]
+    const status = latest?.status
+    let nodeStatus: 'online' | 'offline' | 'pending' = 'pending'
+    if (status === 'online') nodeStatus = 'online'
+    else if (status === 'offline') nodeStatus = 'offline'
     return {
       ...n,
       maxConnections: latest?.maxConnections ?? 100,
       currentConnections: latest?.connections ?? 0,
-      isOnline: latest?.status === 'online',
+      isOnline: status === 'online',
+      nodeStatus,
       loadScore: calculateLoadScore(latest?.maxConnections ?? 100, latest?.connections ?? 0),
       createdAt: n.createdAt instanceof Date ? n.createdAt : new Date(n.createdAt)
     }

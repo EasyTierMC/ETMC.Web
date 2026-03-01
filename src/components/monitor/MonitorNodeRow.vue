@@ -2,7 +2,7 @@
 import type { NodeView } from '@/utils/request/types'
 import { formatDateShort, getLoadScoreColor, getLoadScoreBarColor } from '@/composables'
 
-defineProps<{ node: NodeView }>()
+defineProps<{ node: NodeView & { nodeStatus?: 'online' | 'offline' | 'pending' } }>()
 </script>
 
 <template>
@@ -11,7 +11,11 @@ defineProps<{ node: NodeView }>()
       <div class="flex items-center gap-3 min-w-[200px] shrink-0">
         <div
           class="w-2 h-2 rounded-full"
-          :class="node.isOnline ? 'bg-success' : 'bg-error'"
+          :class="{
+            'bg-success': node.nodeStatus === 'online',
+            'bg-warning': node.nodeStatus === 'pending',
+            'bg-error': node.nodeStatus === 'offline'
+          }"
         ></div>
         <span class="text-sm text-base-content/60 font-mono">{{ node.id }}</span>
         <h2 class="text-base font-semibold">{{ node.name }}</h2>

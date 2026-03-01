@@ -15,6 +15,21 @@ const emit = defineEmits<{
 
 const nodeInfo = computed(() => props.node.nodeInfo?.[0] || {})
 
+const nodeStatus = computed(() => {
+  const status = props.node.nodeStatuses?.[0]?.status
+  if (status === 'online') return 'online'
+  if (status === 'offline') return 'offline'
+  return 'pending'
+})
+
+const titleBgClass = computed(() => {
+  switch (nodeStatus.value) {
+    case 'online': return 'bg-success/75'
+    case 'offline': return 'bg-error/75'
+    default: return 'bg-warning/75'
+  }
+})
+
 function handleDetail() {
   emit('detail', props.node)
 }
@@ -29,20 +44,11 @@ function handleDelete() {
 </script>
 
 <template>
-  <div class="card bg-base-200 shadow hover:shadow-md transition-shadow">
-    <div class="card-body p-4 gap-3">
-      <div class="flex justify-between items-start">
-        <div class="flex-1 min-w-0">
-          <h3 class="font-semibold truncate">{{ node.name }}</h3>
-          <p v-if="node.description" class="text-xs text-base-content/60 truncate mt-1">{{ node.description }}</p>
-        </div>
-        <div class="badge shrink-0 ml-2" :class="{
-          'badge-success': node.isOnline === true,
-          'badge-error': node.isOnline === false
-        }">
-          {{ node.isOnline === true ? '在线' : '离线' }}
-        </div>
-      </div>
+  <div class="card bg-base-200 shadow hover:shadow-md transition-shadow overflow-hidden">
+    <div :class="['px-4 py-3', titleBgClass]">
+      <h3 class="font-semibold truncate">{{ node.name }}</h3>
+    </div>
+    <div class="card-body p-4 gap-3 pt-3">
       
       <div v-if="node.tags && node.tags.length > 0" class="flex flex-wrap gap-1">
         <span v-for="tag in node.tags" :key="tag" class="badge badge-secondary badge-sm">{{ tag }}</span>
