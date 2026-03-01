@@ -1,12 +1,10 @@
 <template>
-  <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-all duration-300 border border-base-300">
-    <div class="card-body p-4 sm:p-5 md:p-6 flex flex-col items-center justify-center min-h-[320px]">
-      <h2 class="card-title text-sm sm:text-base md:text-lg font-semibold mb-2">总负载</h2>
-      <div class="w-full h-[240px]">
-        <v-chart :option="gaugeOption" autoresize class="w-full h-full" />
-      </div>
-      <div class="text-xs sm:text-sm text-base-content/60 mt-2">系统负载</div>
+  <div ref="containerRef" class="w-full flex flex-col items-center justify-center" style="min-height: 350px;">
+    <h2 class="card-title text-sm font-semibold mb-2 opacity-70">总负载</h2>
+    <div ref="chartRef" class="w-full" style="height: 280px;">
+      <v-chart v-if="isReady" :option="gaugeOption" autoresize class="w-full h-full" />
     </div>
+    <div class="text-xs opacity-60 mt-2">系统负载</div>
   </div>
 </template>
 
@@ -24,23 +22,66 @@ const props = defineProps<{
   percent: number;
 }>();
 
+const containerRef = ref<HTMLElement | null>(null);
+const chartRef = ref<HTMLElement | null>(null);
+const isReady = ref(false);
+
 const isDark = ref(false);
+const isSmallScreen = ref(false);
 
 const updateTheme = () => {
   isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
 };
 
+const updateScreenSize = () => {
+  isSmallScreen.value = window.innerWidth < 1024;
+};
+
 let mediaQuery: MediaQueryList;
+let resizeObserver: ResizeObserver | null = null;
+
+const checkAndRender = () => {
+  if (chartRef.value) {
+    const rect = chartRef.value.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) {
+      isReady.value = true;
+      return true;
+    }
+  }
+  return false;
+};
 
 onMounted(() => {
   mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
   updateTheme();
+  updateScreenSize();
   mediaQuery.addEventListener('change', updateTheme);
+  window.addEventListener('resize', updateScreenSize);
+  
+  setTimeout(() => {
+    if (!checkAndRender() && chartRef.value) {
+      resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+            isReady.value = true;
+            if (resizeObserver) {
+              resizeObserver.disconnect();
+            }
+          }
+        }
+      });
+      resizeObserver.observe(chartRef.value);
+    }
+  }, 100);
 });
 
 onUnmounted(() => {
   if (mediaQuery) {
     mediaQuery.removeEventListener('change', updateTheme);
+  }
+  window.removeEventListener('resize', updateScreenSize);
+  if (resizeObserver) {
+    resizeObserver.disconnect();
   }
 });
 
@@ -58,6 +99,7 @@ const labelColor = computed(() => isDark.value ? '#9ca3af' : '#666');
 const gaugeOption = computed(() => {
   const percent = props.percent;
   const pointerColor = getDetailColor(percent);
+  const small = isSmallScreen.value;
   
   return {
     series: [
@@ -68,18 +110,18 @@ const gaugeOption = computed(() => {
         min: 0,
         max: 100,
         splitNumber: 5,
-        radius: '95%',
+        radius: small ? '90%' : '85%',
         pointer: {
           show: true,
-          length: '60%',
-          width: 6,
+          length: small ? '50%' : '55%',
+          width: small ? 4 : 5,
           itemStyle: {
             color: pointerColor
           }
         },
         axisLine: {
           lineStyle: {
-            width: 22,
+            width: small ? 10 : 16,
             color: [
               [0.195, '#86E8AB'],
               [0.2, gapColor.value],
@@ -96,7 +138,7 @@ const gaugeOption = computed(() => {
         axisTick: {
           show: true,
           splitNumber: 4,
-          length: 8,
+          length: small ? 4 : 6,
           lineStyle: {
             width: 1,
             color: tickColor.value
@@ -104,16 +146,16 @@ const gaugeOption = computed(() => {
         },
         splitLine: {
           show: true,
-          length: 20,
+          length: small ? 8 : 12,
           lineStyle: {
-            width: 3,
+            width: small ? 1 : 2,
             color: splitLineColor.value
           }
         },
         axisLabel: {
           show: true,
-          distance: 40,
-          fontSize: 11,
+          distance: small ? 18 : 25,
+          fontSize: small ? 9 : 10,
           fontWeight: 'normal',
           formatter: (value: number) => {
             if (value % 20 === 0) {
@@ -126,9 +168,9 @@ const gaugeOption = computed(() => {
         anchor: {
           show: true,
           showAbove: true,
-          size: 16,
+          size: small ? 10 : 12,
           itemStyle: {
-            borderWidth: 4,
+            borderWidth: small ? 2 : 3,
             borderColor: pointerColor,
             color: gapColor.value
           }
@@ -138,9 +180,9 @@ const gaugeOption = computed(() => {
         },
         detail: {
           valueAnimation: true,
-          fontSize: 36,
+          fontSize: small ? 22 : 28,
           fontWeight: 'bold',
-          offsetCenter: [0, '85%'],
+          offsetCenter: [0, small ? '70%' : '75%'],
           formatter: '{value}%',
           color: getDetailColor(percent)
         },

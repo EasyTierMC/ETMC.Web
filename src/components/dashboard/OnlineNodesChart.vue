@@ -1,24 +1,20 @@
 <template>
-  <div class="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-    <div
-      v-for="(chart, index) in chartConfigs"
-      :key="index"
-      class="card bg-base-100 shadow-lg border border-base-300"
-    >
+  <template v-for="(chart, index) in chartConfigs" :key="index">
+    <div class="card bg-base-100 shadow-lg border border-base-300">
       <div class="card-body p-3 sm:p-4 flex flex-col h-full">
         <div class="mb-1">
           <h3 class="text-xs font-medium opacity-60">{{ chart.subtitle }}</h3>
           <p :class="`text-lg sm:text-xl font-bold ${chart.colorClass}`">{{ chart.currentValue }}</p>
         </div>
-        <div v-if="hourlyData.length > 0" class="w-full flex-1" style="min-height: 120px;">
+        <div v-if="hourlyData.length > 0" class="w-full flex-1" style="min-height: 220px;">
           <v-chart :option="chart.option" autoresize class="w-full h-full" />
         </div>
-        <div v-else class="w-full flex-1 flex items-center justify-center text-base-content/30 text-xs" style="min-height: 120px;">
+        <div v-else class="w-full flex-1 flex items-center justify-center text-base-content/30 text-xs" style="min-height: 220px;">
           暂无数据
         </div>
       </div>
     </div>
-  </div>
+  </template>
 </template>
 
 <script setup lang="ts">
@@ -166,7 +162,7 @@ const chartConfigs = computed(() => {
       option: createChartOption(item => item.onlineNodes, '个')
     },
     {
-      subtitle: '当前在线节点',
+      subtitle: '在线节点',
       currentValue: `${onlineNodes}个`,
       colorClass: 'text-success',
       option: createChartOption(item => item.onlineNodes, '个')
