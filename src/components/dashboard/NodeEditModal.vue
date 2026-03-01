@@ -26,7 +26,8 @@ const formData = ref({
   allow_relay: false,
   maximumBandwidth: 10,
   qq_number: '',
-  mail: ''
+  mail: '',
+  isPublic: false
 })
 
 const protocols = ['wss', 'quic', 'tcp', 'udp']
@@ -44,7 +45,8 @@ watch(() => props.node, (newNode) => {
       allow_relay: nodeInfo.value.isRelay || false,
       maximumBandwidth: nodeInfo.value.maximumBandwidth || 10,
       qq_number: newNode.contact?.qq || '',
-      mail: newNode.contact?.email || ''
+      mail: newNode.contact?.email || '',
+      isPublic: newNode.isPublic || false
     }
   }
 }, { immediate: true })
@@ -82,6 +84,7 @@ function handleSave() {
     protocol: formData.value.protocol,
     isRelay: formData.value.allow_relay,
     maximumBandwidth: formData.value.maximumBandwidth,
+    isPublic: formData.value.isPublic,
     network: {
       name: formData.value.network_name,
       secret: formData.value.network_key
@@ -167,6 +170,13 @@ function handleSave() {
               <input v-model="formData.allow_relay" type="checkbox" class="checkbox checkbox-sm" />
             </label>
           </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">节点公开</span>
+            <input v-model="formData.isPublic" type="checkbox" class="checkbox checkbox-sm" />
+          </label>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
