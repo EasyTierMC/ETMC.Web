@@ -21,6 +21,10 @@ import type {
   ClusterTokenRequest,
   ClusterRefreshRequest,
   Peer,
+  FakeUrl,
+  FakeUrlListResponse,
+  FakeUrlCreateRequest,
+  FakeUrlUpdateRequest,
 } from "./types";
 
 export type {
@@ -45,6 +49,10 @@ export type {
   ClusterTokenRequest,
   ClusterRefreshRequest,
   Peer,
+  FakeUrl,
+  FakeUrlListResponse,
+  FakeUrlCreateRequest,
+  FakeUrlUpdateRequest,
 };
 
 export function login(code: string) {
@@ -248,4 +256,20 @@ export function refreshClusterToken(data: ClusterRefreshRequest) {
 
 export function getPeers() {
   return Api.get<Peer[]>("/peers");
+}
+
+export function listFakeUrls(limit: number = 30, offset: number = 0) {
+  return Api.get<FakeUrlListResponse>(`/admin/fakeurl/?limit=${limit}&offset=${offset}`).then(res => res.data || { items: [], total: 0, offset: 0, limit: 20 });
+}
+
+export function createFakeUrl(data: FakeUrlCreateRequest) {
+  return Api.post<FakeUrl>("/admin/fakeurl/", data);
+}
+
+export function updateFakeUrl(id: number, data: FakeUrlUpdateRequest) {
+  return Api.put<FakeUrl>(`/admin/fakeurl/${id}`, data);
+}
+
+export function deleteFakeUrl(id: number) {
+  return Api.delete(`/admin/fakeurl/${id}`);
 }

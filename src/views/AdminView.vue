@@ -7,17 +7,19 @@ import ErrorDisplay from '@/components/common/ErrorDisplay.vue'
 import UsersTab from '@/components/admin/UsersTab.vue'
 import ApiKeysTab from '@/components/admin/ApiKeysTab.vue'
 import NodesTab from '@/components/admin/NodesTab.vue'
+import FakeUrlsTab from '@/components/admin/FakeUrlsTab.vue'
 
 const router = useRouter()
 const currentUser = ref<any>(null)
 const loading = ref(true)
 const error = ref<string | null>(null)
-const activeTab = ref<'users' | 'apiKeys' | 'nodes'>('users')
+const activeTab = ref<'users' | 'apiKeys' | 'nodes' | 'fakeUrls'>('users')
 
 const tabs = [
   { key: 'users', label: '用户管理' },
   { key: 'apiKeys', label: 'API Key 管理' },
-  { key: 'nodes', label: '节点管理' }
+  { key: 'nodes', label: '节点管理' },
+  { key: 'fakeUrls', label: 'FakeUrl 管理' }
 ]
 
 onMounted(async () => {
@@ -58,9 +60,10 @@ onMounted(async () => {
         </div>
       </div>
       <div class="flex-1 overflow-hidden p-4">
-        <UsersTab v-show="activeTab === 'users'" />
-        <ApiKeysTab v-show="activeTab === 'apiKeys'" />
-        <NodesTab v-show="activeTab === 'nodes'" />
+        <UsersTab v-if="activeTab === 'users'" />
+        <ApiKeysTab v-if="activeTab === 'apiKeys'" />
+        <NodesTab v-if="activeTab === 'nodes'" />
+        <FakeUrlsTab v-if="activeTab === 'fakeUrls'" />
       </div>
     </div>
   </div>

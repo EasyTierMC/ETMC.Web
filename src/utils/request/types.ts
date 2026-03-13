@@ -232,3 +232,34 @@ export interface ClusterRefreshRequest {
   clusterId: string
   token: string
 }
+
+export type NodeProtocol = 'tcp' | 'udp' | 'ws' | 'wss'
+
+export interface FakeUrl {
+  id: number
+  protocol: NodeProtocol
+  host: string
+  port: number
+  description: string | null
+}
+
+export interface FakeUrlListResponse {
+  items: FakeUrl[]
+  total: number
+  offset: number
+  limit: number
+}
+
+export interface FakeUrlCreateRequest {
+  protocol: NodeProtocol
+  host: string
+  port: number
+  description?: string
+}
+
+export interface FakeUrlUpdateRequest {
+  protocol?: NodeProtocol
+  host?: string
+  port?: number
+  description?: string
+}
