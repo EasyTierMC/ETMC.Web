@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 
 interface Props {
   node: any
@@ -13,6 +13,8 @@ const emit = defineEmits<{
   save: [data: any]
 }>()
 
+const nodeInfo = computed(() => props.node?.nodeInfo?.[0] || {})
+
 const formData = ref({
   name: '',
   description: '',
@@ -22,8 +24,10 @@ const formData = ref({
   port: 11010,
   protocol: 'wss',
   allow_relay: false,
+  maximumBandwidth: 10,
   qq_number: '',
-  mail: ''
+  mail: '',
+  isPublic: false
 })
 
 const protocols = ['wss', 'quic', 'tcp', 'udp']
@@ -33,14 +37,16 @@ watch(() => props.node, (newNode) => {
     formData.value = {
       name: newNode.name || '',
       description: newNode.description || '',
-      network_name: newNode.network_name || '',
-      network_key: newNode.network_key || '',
-      host: newNode.host || '',
-      port: newNode.port || 11010,
-      protocol: newNode.protocol || 'wss',
-      allow_relay: newNode.allow_relay || false,
-      qq_number: newNode.qq_number || '',
-      mail: newNode.mail || ''
+      network_name: nodeInfo.value.networkName || '',
+      network_key: nodeInfo.value.networkSecret || '',
+      host: nodeInfo.value.host || '',
+      port: nodeInfo.value.port || 11010,
+      protocol: nodeInfo.value.protocol || 'wss',
+      allow_relay: nodeInfo.value.isRelay || false,
+      maximumBandwidth: nodeInfo.value.maximumBandwidth || 10,
+      qq_number: newNode.contact?.qq || '',
+      mail: newNode.contact?.email || '',
+      isPublic: newNode.isPublic || false
     }
   }
 }, { immediate: true })
@@ -70,7 +76,25 @@ function handleSave() {
     alert('请输入网络密钥')
     return
   }
-  emit('save', { ...formData.value })
+  const submitData = {
+    name: formData.value.name,
+    description: formData.value.description,
+    host: formData.value.host,
+    port: formData.value.port,
+    protocol: formData.value.protocol,
+    isRelay: formData.value.allow_relay,
+    maximumBandwidth: formData.value.maximumBandwidth,
+    isPublic: formData.value.isPublic,
+    network: {
+      name: formData.value.network_name,
+      secret: formData.value.network_key
+    },
+    contact: {
+      email: formData.value.mail,
+      qq: formData.value.qq_number
+    }
+  }
+  emit('save', submitData)
 }
 </script>
 
@@ -136,6 +160,28 @@ function handleSave() {
         <div class="grid grid-cols-2 gap-4">
           <div class="form-control">
             <label class="label">
+              <span class="label-text">最大带宽 (Mbps)</span>
+            </label>
+            <input v-model.number="formData.maximumBandwidth" type="number" placeholder="10" class="input input-bordered input-sm w-full" />
+          </div>
+          <div class="form-control">
+            <label class="label cursor-pointer">
+              <span class="label-text">允许中继</span>
+              <input v-model="formData.allow_relay" type="checkbox" class="checkbox checkbox-sm" />
+            </label>
+          </div>
+        </div>
+
+        <div class="form-control">
+          <label class="label cursor-pointer">
+            <span class="label-text">节点公开</span>
+            <input v-model="formData.isPublic" type="checkbox" class="checkbox checkbox-sm" />
+          </label>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-control">
+            <label class="label">
               <span class="label-text">QQ号码</span>
             </label>
             <input v-model="formData.qq_number" type="text" placeholder="123456789" class="input input-bordered input-sm w-full" />
@@ -148,7 +194,7 @@ function handleSave() {
           </div>
         </div>
 
-        <div class="form-control">
+        <div v-if="false" class="form-control">
           <label class="label cursor-pointer">
             <span class="label-text">允许中继</span>
             <input v-model="formData.allow_relay" type="checkbox" class="checkbox checkbox-sm" />

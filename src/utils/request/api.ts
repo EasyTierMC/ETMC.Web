@@ -1,41 +1,71 @@
 import Api from "./index";
 import type {
   HealthResponse,
-  IClientId,
-  IProfile,
-  ILogin,
-  LoginResponse,
-  Admin,
-  ApiKey,
-  Node,
+  ProfileData,
+  ClientIdData,
+  LoginData,
+  User,
+  UserListResponse,
+  ApiKeyData,
+  ApiKeyListResponse,
+  ApiKeyMyData,
+  ApiKeyRegisterRequest,
+  NodeCreateRequest,
+  AdminNodeData,
+  AdminNodeListResponse,
+  GlobalNodeStatus,
+  GlobalNodeStatusWithHourly,
+  HourlyData,
+  ClusterChallengeData,
+  ClusterTokenData,
+  ClusterTokenRequest,
+  ClusterRefreshRequest,
   Peer,
+  FakeUrl,
+  FakeUrlListResponse,
+  FakeUrlCreateRequest,
+  FakeUrlUpdateRequest,
 } from "./types";
 
 export type {
   HealthResponse,
-  IClientId,
-  IProfile,
-  ILogin,
-  LoginResponse,
-  Admin,
-  ApiKey,
-  Node,
+  ProfileData,
+  ClientIdData,
+  LoginData,
+  User,
+  UserListResponse,
+  ApiKeyData,
+  ApiKeyListResponse,
+  ApiKeyMyData,
+  ApiKeyRegisterRequest,
+  NodeCreateRequest,
+  AdminNodeData,
+  AdminNodeListResponse,
+  GlobalNodeStatus,
+  GlobalNodeStatusWithHourly,
+  HourlyData,
+  ClusterChallengeData,
+  ClusterTokenData,
+  ClusterTokenRequest,
+  ClusterRefreshRequest,
   Peer,
+  FakeUrl,
+  FakeUrlListResponse,
+  FakeUrlCreateRequest,
+  FakeUrlUpdateRequest,
 };
 
-export async function login(code: string): Promise<ILogin> {
-  return (await Api.post<ILogin>(
-    "oauth/callback?code=" + code,
-  )) as unknown as ILogin;
+export function login(code: string) {
+  return Api.post<LoginData>("/oauth/callback?code=" + code);
 }
 
-export async function getClientId(): Promise<IClientId> {
-  return (await Api.get<IClientId>("oauth/clientId")) as unknown as IClientId;
+export function getClientId() {
+  return Api.get<ClientIdData>("/oauth/clientId");
 }
 
-export function getHealth(): Promise<HealthResponse> {
+export function getHealth() {
   const path = import.meta.env.VITE_HEALTH_PATH || "/health";
-  return Api.get<HealthResponse>(path) as unknown as Promise<HealthResponse>;
+  return Api.get(path) as unknown as Promise<HealthResponse>;
 }
 
 export function getApiDocsUrl() {
@@ -52,6 +82,14 @@ export async function logout() {
   }
 }
 
+export async function hasAuthToken(): Promise<boolean> {
+  if (typeof window !== "undefined" && window.cookieStore) {
+    const c = await window.cookieStore.get("auth_token");
+    return !!c;
+  }
+  return false;
+}
+
 export async function isAuthenticated() {
   const s = sessionStorage.getItem("profile");
   if (typeof window !== "undefined" && window.cookieStore) {
@@ -61,67 +99,177 @@ export async function isAuthenticated() {
   return false;
 }
 
-export async function getProfile(): Promise<IProfile> {
+export async function getProfile() {
   let localme = sessionStorage.getItem("profile");
   if (localme) {
     return Promise.resolve(JSON.parse(localme));
   } else {
-    const profile = (await Api.get<IProfile>(
-      "/oauth/profile",
-    )) as unknown as Promise<IProfile>;
-    sessionStorage.setItem("profile", JSON.stringify(profile));
-    return profile;
+    const response = await Api.get<ProfileData>("/oauth/profile");
+    const profile = response.data;
+    if (profile) {
+      sessionStorage.setItem("profile", JSON.stringify(profile));
+    }
+    return profile || null;
   }
 }
 
-export function listAdmins(): Promise<Admin[]> {
-  return Api.get<Admin[]>("/admins") as unknown as Promise<Admin[]>;
+export async function ensureProfile(): Promise<ProfileData | null> {
+  const hasToken = await hasAuthToken();
+  const localProfile = sessionStorage.getItem("profile");
+  
+  if (!hasToken) {
+    return null;
+  }
+  
+  if (localProfile) {
+    return JSON.parse(localProfile);
+  }
+  
+  try {
+    const response = await Api.get<ProfileData>("/oauth/profile");
+    const profile = response.data;
+    if (profile) {
+      sessionStorage.setItem("profile", JSON.stringify(profile));
+    }
+    return profile || null;
+  } catch (error) {
+    console.error("Failed to fetch profile:", error);
+    return null;
+  }
 }
 
-export function deleteAdmin(id: string | number) {
-  return Api.delete(`/admins/${id}`);
+export function listUsers(limit: number, offset: number, role?: 'admin' | 'user') {
+  let url = `/admin/users?limit=${limit}&offset=${offset}`;
+  if (role) {
+    url += `&role=${role}`;
+  }
+  return Api.get<UserListResponse>(url).then(res => res.data || { items: [], total: 0, offset: 0, limit: 20 });
 }
 
-export function createApiKey(data: Partial<ApiKey>) {
-  return Api.post("/api-keys", data);
+export function deleteUser(uuid: string) {
+  return Api.delete(`/admin/users/${uuid}`);
 }
 
-export function listApiKeys(): Promise<ApiKey[]> {
-  return Api.get<ApiKey[]>("/api-keys") as unknown as Promise<ApiKey[]>;
+export function updateUserRole(uuid: string, role: 'admin' | 'user') {
+  return Api.put(`/admin/users/role/${uuid}`, { role });
 }
 
-export function toggleApiKeyStatus(id: string | number, status: string) {
-  return Api.patch(`/api-keys/${id}/status`, { status });
+export function listAdminApiKeys(limit: number, offset: number, type?: 'active' | 'pending') {
+  let url = `/admin/apikey?limit=${limit}&offset=${offset}`;
+  if (type) {
+    url += `&type=${type}`;
+  }
+  return Api.get<ApiKeyListResponse>(url).then(res => res.data || { items: [], total: 0, offset: 0, limit: 20 });
 }
 
-export function deleteApiKey(id: string | number) {
-  return Api.delete(`/api-keys/${id}`);
+export function deleteAdminApiKey(id: number) {
+  return Api.delete(`/admin/apikey/${id}`);
 }
 
-export function updateApiKey(id: string | number, data: Partial<ApiKey>) {
-  return Api.put(`/api-keys/${id}`, data);
+export function updateApiKeyType(id: number, type: 'active' | 'pending') {
+  return Api.put(`/admin/apikey/type/${id}`, { type });
 }
 
-export function createNode(data: Partial<Node>) {
+export function listAdminNodes(limit: number = 30, offset: number = 0, isReviewed?: boolean, isPublic?: boolean) {
+  let url = `/admin/nodes?limit=${limit}&offset=${offset}`;
+  if (isReviewed !== undefined) {
+    url += `&isReviewed=${isReviewed}`;
+  }
+  if (isPublic !== undefined) {
+    url += `&isPublic=${isPublic}`;
+  }
+  return Api.get<AdminNodeListResponse>(url).then(res => res.data || { items: [], total: 0, offset: 0, limit: 20 });
+}
+
+export function updateNodeReviewStatus(id: string | number, isReviewed: boolean) {
+  return Api.put(`/admin/nodes/review/${id}`, { isReviewed });
+}
+
+export function updateNodePublicStatus(id: string | number, isPublic: boolean) {
+  return Api.put(`/admin/nodes/public/${id}`, { isPublic });
+}
+
+export function deleteAdminNode(id: string | number) {
+  return Api.delete(`/admin/nodes/${id}`);
+}
+
+export function registerApiKey(data: ApiKeyRegisterRequest) {
+  return Api.post("/apikey/register", data);
+}
+
+export function createApiKey(data: ApiKeyRegisterRequest) {
+  return Api.post("/apikey/register", data);
+}
+
+export function updateApiKey(id: number, data: ApiKeyRegisterRequest) {
+  return Api.put(`/apikey/${id}`, data);
+}
+
+export function deleteApiKey(id: number | string) {
+  return Api.delete(`/apikey/${id}`);
+}
+
+export function listMyApiKeys() {
+  return Api.get<ApiKeyMyData[]>("/apikey/my").then(res => res.data || []);
+}
+
+export function createNode(data: NodeCreateRequest) {
   return Api.post("/nodes", data);
 }
 
-export function listNodes(): Promise<Node[]> {
-  return Api.get<Node[]>("/nodes") as unknown as Promise<Node[]>;
+export function listNodes(limit?: number, offset?: number, sort?: string, order?: string) {
+  let url = "/nodes?";
+  if (limit !== undefined) url += `limit=${limit}&`;
+  if (offset !== undefined) url += `offset=${offset}&`;
+  if (sort) url += `sort=${sort}&`;
+  if (order) url += `order=${order}&`;
+  return Api.get(url).then(res => res.data?.nodes || []);
+}
+
+export function listMyNodes() {
+  return Api.get("/nodes/me").then(res => res.data || []);
+}
+
+export function updateNode(nodeId: string, data: NodeCreateRequest) {
+  return Api.put(`/nodes/${nodeId}`, data);
 }
 
 export function deleteNode(id: string | number) {
   return Api.delete(`/nodes/${id}`);
 }
 
-export function updateNode(id: string | number, data: Partial<Node>) {
-  return Api.put(`/nodes/${id}`, data);
+export function getGlobalNodeStatus() {
+  return Api.get<GlobalNodeStatusWithHourly>("/nodes/status/global").then(res => res.data!);
 }
 
-export function updateNodeStatus(id: string | number, status: string) {
-  return Api.put(`/nodes/${id}/status`, { status });
+export function getClusterChallenge(clusterId: string) {
+  return Api.get<ClusterChallengeData>(`/cluster/challenge?clusterId=${clusterId}`);
 }
 
-export function getPeers(): Promise<Peer[]> {
-  return Api.get<Peer[]>("/peers") as unknown as Promise<Peer[]>;
+export function getClusterToken(data: ClusterTokenRequest) {
+  return Api.post<ClusterTokenData>("/cluster/token", data);
+}
+
+export function refreshClusterToken(data: ClusterRefreshRequest) {
+  return Api.post<ClusterTokenData>("/cluster/refresh", data);
+}
+
+export function getPeers() {
+  return Api.get<Peer[]>("/peers");
+}
+
+export function listFakeUrls(limit: number = 30, offset: number = 0) {
+  return Api.get<FakeUrlListResponse>(`/admin/fakeurl/?limit=${limit}&offset=${offset}`).then(res => res.data || { items: [], total: 0, offset: 0, limit: 20 });
+}
+
+export function createFakeUrl(data: FakeUrlCreateRequest) {
+  return Api.post<FakeUrl>("/admin/fakeurl/", data);
+}
+
+export function updateFakeUrl(id: number, data: FakeUrlUpdateRequest) {
+  return Api.put<FakeUrl>(`/admin/fakeurl/${id}`, data);
+}
+
+export function deleteFakeUrl(id: number) {
+  return Api.delete(`/admin/fakeurl/${id}`);
 }

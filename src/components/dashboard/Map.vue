@@ -1,15 +1,17 @@
 <template>
-  <div class="w-full h-full">
-    <v-chart class="chart w-full h-full" :option="option" />
+  <div ref="chartContainer" class="w-full h-full">
+    <v-chart class="w-full h-full" :option="option" autoresize />
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import VChart from 'vue-echarts';
 import china from "@/assets/china.json"
 import * as echarts from 'echarts';
 echarts.registerMap('china', china as any);
+
+const chartContainer = ref<HTMLElement | null>(null);
 
 const data = [
   { name: '北京', value: 85 },
@@ -17,7 +19,6 @@ const data = [
   { name: '广东', value: 9 },
   { name: '浙江', value: 65 },
   { name: '江苏', value: 58 },
-  // 更多数据...
 ]
 
 const option = ref<echarts.EChartsOption>({
@@ -27,13 +28,13 @@ const option = ref<echarts.EChartsOption>({
     min: 0,
     max: 50,
     pieces: [
-      { max: 3, label: '少(0-3)', color: '#ff4d4d' },
-      { min: 3, max: 10, label: '中(3-10)', color: '#ffa64d' },
-      { min: 10, max: 15, label: '多(10-15)', color: '#ffcc00' },
-      { min: 15, max: 25, label: '非常多(15-25)', color: '#99cc33' },
-      { min: 30, label: '数据中心(30+)', color: '#33cc33' }
+      { max: 3, label: '少 (0-3)', color: '#ff4d4d' },
+      { min: 3, max: 10, label: '中 (3-10)', color: '#ffa64d' },
+      { min: 10, max: 15, label: '多 (10-15)', color: '#ffcc00' },
+      { min: 15, max: 25, label: '非常多 (15-25)', color: '#99cc33' },
+      { min: 30, label: '数据中心 (30+)', color: '#33cc33' }
     ],
-    textStyle: { color: undefined }
+    textStyle: { color: '#fff' }
   },
   series: [{
     name: '服务器节点',
@@ -46,43 +47,19 @@ const option = ref<echarts.EChartsOption>({
   }]
 });
 
-const updateTheme = (e: MediaQueryListEvent | boolean) => {
-  const isDark = typeof e === 'boolean' ? e : e.matches;
-  const color = option.value.visualMap as { textStyle: { color: string } };
-  color.textStyle.color = isDark ? '#fff' : '#000';
-};
-
 onMounted(() => {
-  const chartElement = document.querySelector('.chart') as HTMLElement;
-  if (!chartElement) return;
-  
-  const chart = echarts.getInstanceByDom(chartElement);
-  if (!chart) return;
-
-  // 立即设置一次大小
-  chart.resize();
-
-  // 监听窗口大小变化
-  const handleResize = () => {
-    chart.resize();
-  };
-  
-  window.addEventListener('resize', handleResize);
-
-  // 使用 ResizeObserver 监听容器大小变化
-  const resizeObserver = new ResizeObserver(() => {
-    chart.resize();
-  });
-  resizeObserver.observe(chartElement);
-
   const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-  updateTheme(mediaQuery.matches);
-  mediaQuery.addEventListener('change', updateTheme);
-
-  return () => {
-    window.removeEventListener('resize', handleResize);
-    resizeObserver.disconnect();
-    mediaQuery.removeEventListener('change', updateTheme);
+  const updateTheme = () => {
+    const isDark = mediaQuery.matches;
+    const visualMap = option.value.visualMap;
+    if (visualMap && !Array.isArray(visualMap)) {
+      visualMap.textStyle = {
+        color: isDark ? '#fff' : '#000'
+      };
+    }
   };
+  
+  updateTheme();
+  mediaQuery.addEventListener('change', updateTheme);
 });
 </script>

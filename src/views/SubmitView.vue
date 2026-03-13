@@ -1,5 +1,5 @@
 <template>
-  <div class="flex justify-center px-4">
+  <div class="flex justify-center px-4 rounded-xl">
     <div class="w-full max-w-7xl">
       <div class="text-center">
         <h2 class="text-3xl font-bold mb-2">提交节点</h2>
@@ -15,7 +15,7 @@
               <form @submit.prevent="handleCreateNode" class="grid gap-4">
 
             <!-- 基础信息 -->
-            <div class="space-y-4">
+            <div class="space-y-5">
               <label class="form-control w-full">
                 <div class="label">
                   <span class="label-text">节点名称 <span class="text-error">*</span></span>
@@ -43,9 +43,9 @@
 
                 <label class="form-control w-full">
                   <div class="label">
-                    <span class="label-text">最大连接数 <span class="text-error">*</span></span>
+                    <span class="label-text">最大上行流量（Mbps） <span class="text-error">*</span></span>
                   </div>
-                  <input v-model.number="nodeForm.max_connections" type="number" placeholder="例如：10"
+                  <input v-model.number="nodeForm.maximumBandwidth" type="number" placeholder="例如：10"
                     class="input input-bordered w-full" min="1" required />
                 </label>
               </div>
@@ -79,7 +79,7 @@
             <!-- 允许中继 -->
             <div class="form-control">
               <label class="label cursor-pointer justify-start gap-3">
-                <input v-model="nodeForm.allow_relay" type="checkbox" class="checkbox checkbox-primary rounded-box" />
+                <input v-model="nodeForm.isRelay" type="checkbox" class="checkbox checkbox-primary rounded-box" />
                 <span class="label-text">允许中继连接</span>
               </label>
             </div>
@@ -92,7 +92,7 @@
                 <div class="label">
                   <span class="label-text">网络名称<span class="text-error">*</span></span>
                 </div>
-                <input v-model="nodeForm.network_name" type="text" placeholder="默认网络" class="input input-bordered w-full"
+                <input v-model="nodeForm.network.name" type="text" placeholder="默认网络" class="input input-bordered w-full"
                   required />
               </label>
 
@@ -100,7 +100,7 @@
                 <div class="label">
                   <span class="label-text">网络密钥<span class="text-error">*</span></span>
                 </div>
-                <input v-model="nodeForm.network_secret" type="password" placeholder="请输入网络密钥"
+                <input v-model="nodeForm.network.secret" type="password" placeholder="请输入网络密钥"
                   class="input input-bordered w-full" required />
               </label>
             </div>
@@ -132,7 +132,7 @@
                 <div class="label">
                   <span class="label-text">QQ 号码</span>
                 </div>
-                <input v-model="nodeForm.qq_number" type="text" placeholder="例如：123456789"
+                <input v-model="nodeForm.contact.qq" type="text" placeholder="例如：123456789"
                   class="input input-bordered w-full" />
               </label>
 
@@ -140,7 +140,7 @@
                 <div class="label">
                   <span class="label-text">邮箱地址</span>
                 </div>
-                <input v-model="nodeForm.mail" type="email" placeholder="例如：admin@example.com"
+                <input v-model="nodeForm.contact.email" type="email" placeholder="例如：admin@example.com"
                   class="input input-bordered w-full" />
               </label>
             </div>
@@ -176,7 +176,7 @@
                 节点配置建议
               </h3>
               
-              <div class="space-y-4">
+              <div class="space-y-5">
                 <!-- 协议建议 -->
                 <div class="alert alert-info">
                   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
@@ -237,39 +237,25 @@
 </template>
 
 <script setup lang="ts">
-import { createNode } from '@/utils/request/api'
+import { createNode, type NodeCreateRequest } from '@/utils/request/api'
 import { ref } from 'vue'
 
-interface INodefrom {
-  name: string;
-  host: string;
-  port: number;
-  protocol: 'tcp' | 'udp' | 'ws' | 'wss';
-  allow_relay: boolean;
-  network_name: string | null;
-  network_secret: string | null;
-  max_connections: number;
-  region: string | null;
-  ISP: string | null;
-  qq_number: string | null;
-  mail: string | null;
-  description: string;
-}
-
-const nodeForm = ref<INodefrom>({
+const nodeForm = ref<NodeCreateRequest>({
   name: '',
+  description: '',
   host: '',
   port: 11010,
   protocol: 'tcp',
-  allow_relay: true,
-  network_name: null,
-  network_secret: null,
-  max_connections: 100,
-  region: null,
-  ISP: null,
-  qq_number: null,
-  mail: null,
-  description: ''
+  isRelay: true,
+  maximumBandwidth: 10,
+  network: {
+    name: '',
+    secret: ''
+  },
+  contact: {
+    email: null,
+    qq: null
+  }
 })
 
 const submitting = ref(false)
@@ -277,23 +263,25 @@ const submitting = ref(false)
 function resetForm() {
   nodeForm.value = {
     name: '',
+    description: '',
     host: '',
     port: 11010,
     protocol: 'tcp',
-    allow_relay: true,
-    network_name: null,
-    network_secret: null,
-    max_connections: 100,
-    region: null,
-    ISP: null,
-    qq_number: null,
-    mail: null,
-    description: ''
+    isRelay: true,
+    maximumBandwidth: 10,
+    network: {
+      name: '',
+      secret: ''
+    },
+    contact: {
+      email: null,
+      qq: null
+    }
   }
 }
 
 async function handleCreateNode() {
-  if (!nodeForm.value.name || !nodeForm.value.host || !nodeForm.value.network_name || !nodeForm.value.network_secret) return
+  if (!nodeForm.value.name || !nodeForm.value.host || !nodeForm.value.network.name || !nodeForm.value.network.secret) return
   submitting.value = true
   try {
     await createNode(nodeForm.value)

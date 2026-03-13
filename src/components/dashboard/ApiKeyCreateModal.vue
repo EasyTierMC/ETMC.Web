@@ -15,7 +15,7 @@ const emit = defineEmits<{
 const formData = ref({
   name: '',
   description: '',
-  ua: ''
+  userAgent: ''
 })
 
 watch(() => props.show, (newShow) => {
@@ -23,7 +23,7 @@ watch(() => props.show, (newShow) => {
     formData.value = {
       name: '',
       description: '',
-      ua: ''
+      userAgent: ''
     }
   }
 })
@@ -64,7 +64,7 @@ function handleSave() {
           <label class="label">
             <span class="label-text">User-Agent (正则表达式)</span>
           </label>
-          <input v-model="formData.ua" type="text" placeholder="例如: PCL/* 或 HMCL/*" class="input input-bordered input-sm w-full" />
+          <input v-model="formData.userAgent" type="text" placeholder="例如: PCL/* 或 HMCL/*" class="input input-bordered input-sm w-full" />
           <label class="label">
             <span class="label-text-alt text-base-content/60">支持正则表达式，例如 PCL/* 匹配所有 PCL 开头的 UA</span>
           </label>
